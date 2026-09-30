@@ -14,13 +14,13 @@ export const ProductController = {
       let items = await ProductModel.getAll();
 
       // Soporte opcional de filtrado por búsqueda en backend
-      if (search) {
-        const query = search.toLowerCase();
-        items = items.filter(
-          item =>
-            item.nombre.toLowerCase().includes(query) ||
-            item.descripcion.toLowerCase().includes(query)
-        );
+      if (search && typeof search === 'string') {
+        const query = search.trim().toLowerCase();
+        items = items.filter(item => {
+          const nombre = item.nombre ? item.nombre.lowerCase() : '';
+          const descripcion = item.descripcion ? item.descripcion.lowerCase() : '';
+          return nombre.includes(query) || descripcion.includes(query);
+        })
       }
 
       return res.status(200).json({
@@ -40,6 +40,15 @@ export const ProductController = {
   async getProductById(req, res, next) {
     try {
       const { id } = req.params;
+
+      const numericId = Number(id);
+      if (isNaN(numericId)) {
+        return res.status(400).json({
+          success: false,
+          error: 'El ID del producto debe ser un número válido.'
+        });
+      }
+
       const product = await ProductModel.getById(id);
 
       if (!product) {
