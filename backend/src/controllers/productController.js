@@ -45,7 +45,7 @@ export const ProductController = {
       if (isNaN(numericId)) {
         return res.status(400).json({
           success: false,
-          error: 'El ID del producto debe ser un número válido.'
+          message: 'El ID del producto debe ser un número válido.'
         });
       }
 
