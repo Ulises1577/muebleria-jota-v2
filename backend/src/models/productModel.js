@@ -10,7 +10,7 @@ export const ProductModel = {
    */
   async getAll() {
     // Simulamos comportamiento asíncrono para replicar interacción con base de datos
-    return Promise.resolve(products);
+    return Promise.resolve([...products]);
   },
 
   /**
@@ -19,7 +19,6 @@ export const ProductModel = {
    * @returns {Promise<Object|null>} Producto encontrado o null
    */
   async getById(id) {
-    const numericId = parseInt(id, 10);
     const product = products.find(p => p.id === numericId);
     return Promise.resolve(product || null);
   }
