@@ -1,0 +1,29 @@
+/* Paleta oficial de Hermanos Jota - Manual de Marca 2026 */
+:root {
+  --siena-tostado: #A0522D;       /* Color principal de marca, títulos y CTAs */
+  --verde-salvia: #87A96B;        /* Acento secundario y sustentabilidad */
+  --alabastro-calido: #F5E6D3;    /* Fondos principales, superficies suaves */
+  --vara-de-oro: #D4A437;         /* Detalles premium, acentos dorados */
+  --rosa-polvoriento: #C47A6D;    /* Acentos suaves y calidez */
+
+  /* Variantes funcionales */
+  --siena-hover: #874322;
+  --siena-dark: #5C2B14;
+  --verde-light: #EBF2E6;
+  --verde-dark: #557544;
+  --alabastro-light: #FAF6F0;
+
+  --color-bg: #FAF8F5;
+  --color-card-bg: #FFFFFF;
+  --color-text-main: #2C2523;
+  --color-text-secondary: #6E6259;
+  --color-border: #E8DDCE;
+
+  --shadow-sm: 0 2px 4px rgba(44, 37, 35, 0.05);
+  --shadow-md: 0 4px 12px rgba(44, 37, 35, 0.08);
+  --shadow-lg: 0 10px 24px rgba(44, 37, 35, 0.12);
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --transition: all 0.25s ease;
+}
