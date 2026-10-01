@@ -6,8 +6,14 @@ import productRoutes from './routes/productRoutes.js';
 
 const app = express();
 
+const corsOptions = {
+  origin:config.frontendUrl,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}
+
 // Middlewares globales
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json()); // Habilitado para futuras peticiones POST/PUT
 app.use(requestLogger);
 
