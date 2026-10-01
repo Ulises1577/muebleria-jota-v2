@@ -74,7 +74,7 @@ export const CatalogPage = ({ products = [], onSelectProduct, isLoading, error }
     <option value="Oficina">Oficina</option>
   </select>
 
-  <label htmlFor="filtro-categoria">Categoría:</label>
+  <label htmlFor="orden-productos">Ordenar:</label>
 
   <select
     id="orden-productos"
