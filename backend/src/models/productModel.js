@@ -19,6 +19,7 @@ export const ProductModel = {
    * @returns {Promise<Object|null>} Producto encontrado o null
    */
   async getById(id) {
+    const numericId = Number(id);
     const product = products.find(p => p.id === numericId);
     return Promise.resolve(product || null);
   }
