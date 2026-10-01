@@ -25,3 +25,100 @@ body { margin: 0; background: #faf8f5; color: var(--color-text-main); font-famil
 .footer-principal { padding: 1.5rem; color: #d6ccc2; background: #2c2523; border-top: 3px solid var(--siena-tostado); text-align: center; }
 @media (min-width: 640px) { .grid-productos { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 992px) { .grid-productos { grid-template-columns: repeat(3, 1fr); } }
+.filtros-catalogo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .filtros-catalogo label {
+    color: var(--color-text-main);
+    font-size: .85rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .filtros-catalogo select {
+    min-width: 210px;
+    padding: .9rem 1.15rem;
+    color: var(--color-text-main);
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: .45rem;
+    box-shadow: var(--shadow-sm);
+    font: inherit;
+    cursor: pointer;
+    outline: none;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+
+  .filtros-catalogo select:hover {
+    border-color: var(--siena-tostado);
+  }
+
+  .filtros-catalogo select:focus {
+    border-color: var(--siena-tostado);
+    box-shadow: 0 0 0 3px rgba(160,82,45,.15);
+  }
+
+  .info-catalogo {
+    width: 100%;
+    max-width: 1200px;
+    margin: 1.4rem auto 0;
+    padding: 0 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .contador-resultados {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: .8125rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .boton-limpiar {
+    padding: 0;
+    color: var(--siena-tostado);
+    background: transparent;
+    border: 0;
+    font: inherit;
+    font-size: .8125rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .boton-limpiar:hover {
+    color: var(--siena-tostado-hover);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 640px) {
+    .filtros-catalogo {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .filtros-catalogo label {
+      text-align: left;
+    }
+
+    .filtros-catalogo select {
+      width: 100%;
+    }
+
+    .info-catalogo {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
