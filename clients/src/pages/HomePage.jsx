@@ -8,11 +8,18 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
 
   return (
     <div className="home-main">
-      {/* Hero Section Oficial */}
+     {/* Hero Section Oficial */}
       <section className="home-hero" aria-labelledby="hero-title">
+        {}
+        <img 
+          src="/assets/aparador_uspallata_hero.png" 
+          alt="Detalle mueble lateral izquierdo" 
+          className="hero-side-img hero-img-left" 
+        />
+
+        {/* Tu contenido centrado intacto */}
         <div className="home-container hero-content">
-          <span className="hero-eyebrow">Diseño con historia</span>
-          <h1 id="hero-title">Tradición y calidad en cada mueble</h1>
+          <h1 id="hero-title">Clase que se siente al tacto</h1>
           <p>
             Más de 30 años creando muebles artesanales, cálidos y duraderos para acompañar la vida de tu hogar.
           </p>
@@ -24,6 +31,13 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
             Explorar colección
           </button>
         </div>
+
+        {/* Imagen derecha */}
+        <img 
+          src="/assets/sillon_copacabana_hero.png" 
+          alt="Detalle mueble lateral derecho" 
+          className="hero-side-img hero-img-right" 
+        />
       </section>
 
       {/* Sección Productos Destacados */}
