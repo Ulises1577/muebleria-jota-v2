@@ -3,6 +3,7 @@ import cors from 'cors';
 import { requestLogger } from './middleware/logger.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 import productRoutes from './routes/productRoutes.js';
+import { config } from './config/env.js';
 
 const app = express();
 
