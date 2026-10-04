@@ -1,3 +1,5 @@
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 import express from 'express';
 import cors from 'cors';
 import { requestLogger } from './middleware/logger.js';
@@ -8,7 +10,7 @@ import { config } from './config/env.js';
 const app = express();
 
 const corsOptions = {
-  origin:config.frontendUrl,
+  origin: config.frontendUrl,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }
@@ -30,6 +32,26 @@ app.get('/', (req, res) => {
     }
   });
 });
+
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'API Mueblería Jota',
+      version: '1.0.0',
+      description: 'Documentación del backend de Mueblería Jota',
+    },
+    servers: [
+      {
+        url: 'http://localhost:3000', // Actualizado al puerto correcto
+      },
+    ],
+  },
+  apis: ['./src/routes/*.js'],
+};
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Montaje de rutas de la API
 app.use('/api/productos', productRoutes);
