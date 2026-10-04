@@ -6,6 +6,7 @@ Proyecto web integral para la mueblería artesanal contemporánea **Hermanos Jot
 
 ## 👥 Integrantes
 
+- **Manrique Castro, Ulises Gabriel**
 - **Peralta Cassutti, Noah Nicanor**
 - **Ponce, Uriel Joaquín**
 - **Rolón, Clara Sofía**
