@@ -9,26 +9,31 @@ export const ProductCard = ({ product, onSelectProduct }) => {
 
   return (
     <article className="tarjeta-producto">
-      <img 
-        src={product.imagen} 
-        alt={product.nombre} 
-        className="producto-imagen"
+      <div
+        className="producto-media"
         onClick={() => onSelectProduct(product.id)}
-        style={{ cursor: 'pointer' }}
-      />
+      >
+        <img
+          src={product.imagen}
+          alt={product.nombre}
+          className="producto-imagen"
+          loading="lazy"
+        />
+      </div>
       <div className="producto-info">
-        <h3 
-          onClick={() => onSelectProduct(product.id)}
-          style={{ cursor: 'pointer' }}
-        >
+        {product.categoria && (
+          <span className="producto-categoria">{product.categoria}</span>
+        )}
+        <h3 onClick={() => onSelectProduct(product.id)}>
           {product.nombre}
         </h3>
         <p className="producto-descripcion">{product.descripcion}</p>
         <p className="producto-precio">{precioFormateado}</p>
-        <button 
+        <button
           type="button"
-          className="btn-detalle"
+          className="producto-cta"
           onClick={() => onSelectProduct(product.id)}
+          aria-label={`Ver detalle de ${product.nombre}`}
         >
           Ver detalle
         </button>

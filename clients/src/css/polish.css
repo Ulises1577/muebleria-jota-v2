@@ -1,0 +1,77 @@
+/* Detalles de acabado compartidos. Se importa al final para ajustar sin reescribir cada pantalla. */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --color-text-secondary-strong: #5C514A; /* AA sobre Alabastro Cálido */
+  --color-error: #A13D2B;
+}
+
+html { scroll-behavior: smooth; }
+
+/* Superficies del navegador tematizadas con la paleta */
+::selection { color: var(--siena-tostado-dark); background: rgba(212, 164, 55, .38); }
+:focus-visible { outline: 2px solid var(--siena-tostado); outline-offset: 2px; }
+html { scrollbar-color: rgba(160, 82, 45, .45) var(--alabastro-claro); }
+
+/* Navbar: respuesta táctil y transiciones afinadas */
+.nav-link { transition: color 180ms var(--ease-out), background-color 180ms var(--ease-out); }
+.nav-link:focus-visible { outline: 2px solid var(--siena-tostado); outline-offset: 2px; }
+.nav-toggle, .cart-button { transition: background-color 180ms var(--ease-out), transform 160ms var(--ease-out); }
+.nav-toggle:active, .cart-button:active { transform: scale(.94); }
+.nav-toggle:focus-visible, .cart-button:focus-visible { outline: 2px solid var(--siena-tostado); outline-offset: 2px; }
+
+@media (min-width: 768px) {
+  .nav-link { position: relative; }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    right: .65rem;
+    bottom: .2rem;
+    left: .65rem;
+    height: 2px;
+    background: var(--siena-tostado);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 260ms var(--ease-out);
+  }
+  .nav-link.active::after { transform: scaleX(1); }
+  .nav-link:hover::after { transform: scaleX(1); }
+}
+
+/* Links de sección y destacados: subrayado que se dibuja */
+.section-link {
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  text-decoration: none;
+  transition: background-size 260ms var(--ease-out), color 180ms var(--ease-out);
+}
+.section-link:hover { color: var(--siena-tostado-hover); background-size: 100% 1px; }
+.section-link:focus-visible { outline: 2px solid var(--siena-tostado); outline-offset: 4px; border-radius: 2px; }
+
+/* Historia: acento Vara de Oro arriba en lugar de borde lateral */
+.history-highlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 2rem;
+  width: 48px;
+  height: 3px;
+  background: var(--vara-de-oro);
+}
+
+/* Cierre: banda Siena con texto Alabastro (contraste 4.6:1) */
+.home-cta { color: var(--alabastro-calido); background: var(--siena-tostado); }
+.home-cta-inner { display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 1.75rem; padding-block: 3.5rem; }
+.home-cta h2 { max-width: 20ch; margin: 0 0 .6rem; color: var(--alabastro-calido); font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.6rem, 3vw, 2.25rem); font-weight: 400; line-height: 1.2; letter-spacing: .02em; text-transform: none; }
+.home-cta p { max-width: 46ch; margin: 0; color: var(--alabastro-calido); }
+.home-cta .home-button:focus-visible { outline-color: var(--alabastro-calido); }
+@media (min-width: 768px) { .home-cta-inner { flex-direction: row; align-items: center; } }
+
+/* Revelado al scroll (solo si JS lo activó) */
+.reveal-ready [data-reveal] { opacity: 0; transform: translateY(18px); transition: opacity 600ms var(--ease-out), transform 600ms var(--ease-out); }
+.reveal-ready [data-reveal].is-visible { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+  .reveal-ready [data-reveal] { opacity: 1; transform: none; }
+  .hero-side-img { transform: translateY(-50%); }
+}

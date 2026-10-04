@@ -2,14 +2,14 @@
 /* index.css */
 @import './css/brand-theme.css';
 @import './css/typography.css';
+@import './css/navbar.css';
 @import './css/styles.css';
 @import './css/productos.css';
 @import './css/producto.css';
 @import './css/contacto.css';
+/* El footer va después de producto/contacto: ambos traían copias del pie oscuro */
 @import './css/footer.css';
-
-/* IMPORTANTE: Este siempre al final de todos los demás */
-@import './css/header-unico.css';
+@import './css/polish.css';
 
 /* Ajustes mínimos para integración fluida de React */
 #root {

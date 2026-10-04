@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import Sostenibilidad from "../components/Sostenibilidad";
+import React, { useEffect, useRef } from 'react';
 
 export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
   // Destacados oficiales: IDs 1, 4, 7 y 8
@@ -7,65 +6,73 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
   const destacados = products.filter(p => destacadosIds.includes(p.id));
   const itemsAMostrar = destacados.length > 0 ? destacados : products.slice(0, 4);
 
-  // --- TRANSICIÓN SUAVE AL SCROLLEAR (GLOBAL) ---
+  // Revelado suave al hacer scroll (solo se activa si hay JS; respeta prefers-reduced-motion vía CSS)
+  const mainRef = useRef(null);
   useEffect(() => {
-    const sections = document.querySelectorAll("main section, .home-container, section");
-    
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("section-visible");
-            observer.unobserve(entry.target); // Se anima una sola vez
-          }
-        });
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -80px 0px" }
+    const root = mainRef.current;
+    if (!root || typeof IntersectionObserver === 'undefined') return undefined;
+    root.classList.add('reveal-ready');
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
+      }),
+      { threshold: 0.12, rootMargin: '0px 0px -6% 0px' }
     );
-
-    sections.forEach((sec) => {
-      sec.classList.add("section-fade");
-      observer.observe(sec);
-    });
-
-    return () => observer.disconnect();
+    root.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+    return () => { io.disconnect(); root.classList.remove('reveal-ready'); };
   }, []);
 
   return (
-    <div className="home-main">
-      {/* Hero Section Oficial */}
+    <div className="home-main" ref={mainRef}>
+      {/* Hero: mismo concepto (aparador | título centrado | sillón), refinado */}
       <section className="home-hero" aria-labelledby="hero-title">
-        <img 
-          src="/assets/aparador_uspallata_hero.png" 
-          alt="Detalle mueble lateral izquierdo" 
-          className="hero-side-img hero-img-left" 
+        <img
+          src="/assets/aparador_uspallata_hero.png"
+          alt="Aparador Uspallata en nogal con frente de rejilla"
+          className="hero-side-img hero-img-left"
+          decoding="async"
         />
 
-        {/* Tu contenido centrado intacto */}
         <div className="home-container hero-content">
           <h1 id="hero-title">Clase que se siente al tacto</h1>
           <p>
-            Más de 30 años creando muebles artesanales, cálidos y duraderos para acompañar la vida de tu hogar.
+            Descubri la sensación de habitar Materiales de Verdad.
           </p>
-          <button 
-            type="button"
-            className="home-button" 
-            onClick={() => onNavigate('catalog')}
-          >
-            Explorar colección
-          </button>
+          <div className="hero-actions">
+            <button
+              type="button"
+              className="home-button"
+              onClick={() => onNavigate('catalog')}
+            >
+              Explorar colección
+            </button>
+            <button
+              type="button"
+              className="home-button home-button--ghost"
+              onClick={() => onNavigate('contact')}
+            >
+              Visitar el taller
+            </button>
+          </div>
         </div>
 
-        {/* Imagen derecha */}
-        <img 
-          src="/assets/sillon_copacabana_hero.png" 
-          alt="Detalle mueble lateral derecho" 
-          className="hero-side-img hero-img-right" 
+        <img
+          src="/assets/sillon_copacabana_hero.png"
+          alt="Sillón Copacabana en cuero y madera"
+          className="hero-side-img hero-img-right"
+          decoding="async"
         />
       </section>
 
+      {/* Datos de la casa (solo información ya presente en el sitio) */}
+      <ul className="home-values" aria-label="Sobre Hermanos Jota">
+        <li>Desde 1960</li>
+        <li>Casa taller en San Cristóbal</li>
+        <li>Diseño Mid-Century Modern</li>
+      </ul>
+
       {/* Sección Productos Destacados */}
-      <section className="home-section home-container" aria-labelledby="featured-title">
+      <section className="home-section home-container" aria-labelledby="featured-title" data-reveal>
         <div className="section-heading">
           <div>
             <span className="section-eyebrow">Selección de la casa</span>
@@ -135,7 +142,7 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
       <Sostenibilidad />
 
       {/* Sección Historia Oficial */}
-      <section className="history-section home-container" aria-labelledby="history-title">
+      <section className="history-section home-container" aria-labelledby="history-title" data-reveal>
         <div className="history-copy">
           <span className="section-eyebrow">Nuestra historia</span>
           <h2 id="history-title">Una tradición que sigue viva</h2>
@@ -150,6 +157,19 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
           <strong>Diseño Mid-Century Modern</strong>
           Líneas limpias, materiales nobles, funcionalidad clara y una estética atemporal guían cada mueble que sale de nuestra casa taller.
         </aside>
+      </section>
+
+      {/* Cierre de la página */}
+      <section className="home-cta" aria-labelledby="cta-title" data-reveal>
+        <div className="home-container home-cta-inner">
+          <div>
+            <h2 id="cta-title">Las piezas se entienden en persona</h2>
+            <p>Visitá la casa taller en Av. San Juan 2847, San Cristóbal, y tocá la madera antes de elegir.</p>
+          </div>
+          <button type="button" className="home-button home-button--light" onClick={() => onNavigate('contact')}>
+            Visitar el taller
+          </button>
+        </div>
       </section>
     </div>
   );
