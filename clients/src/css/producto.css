@@ -109,7 +109,7 @@ ul, ol {
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: rgba(250, 246, 240, 0.94);
+  background-color: #F3EBE1;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
@@ -553,6 +553,7 @@ ul, ol {
   color: var(--siena-tostado);
   font-weight: 700;
   margin-top: 0.25rem;
+  text-decoration: none;
 }
 
 .specs-table-container {

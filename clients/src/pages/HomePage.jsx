@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import Sostenibilidad from "../components/Sostenibilidad";
 
 export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
   // Destacados oficiales: IDs 1, 4, 7 y 8
@@ -6,11 +7,34 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
   const destacados = products.filter(p => destacadosIds.includes(p.id));
   const itemsAMostrar = destacados.length > 0 ? destacados : products.slice(0, 4);
 
+  // --- TRANSICIÓN SUAVE AL SCROLLEAR (GLOBAL) ---
+  useEffect(() => {
+    const sections = document.querySelectorAll("main section, .home-container, section");
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("section-visible");
+            observer.unobserve(entry.target); // Se anima una sola vez
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -80px 0px" }
+    );
+
+    sections.forEach((sec) => {
+      sec.classList.add("section-fade");
+      observer.observe(sec);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="home-main">
-     {/* Hero Section Oficial */}
+      {/* Hero Section Oficial */}
       <section className="home-hero" aria-labelledby="hero-title">
-        {}
         <img 
           src="/assets/aparador_uspallata_hero.png" 
           alt="Detalle mueble lateral izquierdo" 
@@ -106,6 +130,9 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
           })}
         </div>
       </section>
+
+      {/* Nueva sección Sostenibilidad */}
+      <Sostenibilidad />
 
       {/* Sección Historia Oficial */}
       <section className="history-section home-container" aria-labelledby="history-title">
