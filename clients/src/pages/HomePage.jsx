@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import Sostenibilidad from '../components/Sostenibilidad';
 
 export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
   // Destacados oficiales: IDs 1, 4, 7 y 8
