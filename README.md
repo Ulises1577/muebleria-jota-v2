@@ -10,6 +10,7 @@ Proyecto web integral para la mueblería artesanal contemporánea **Hermanos Jot
 - **Peralta Cassutti, Noah Nicanor**
 - **Ponce, Uriel Joaquín**
 - **Rolón, Clara Sofía**
+- **Colque, Jimena**
 
 
 ---
