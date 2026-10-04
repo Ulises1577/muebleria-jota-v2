@@ -6,9 +6,9 @@ Proyecto web integral para la mueblería artesanal contemporánea **Hermanos Jot
 
 ## 👥 Integrantes
 
-- **Figueredo, Maia Rita Candelaria**
 - **Peralta Cassutti, Noah Nicanor**
 - **Ponce, Uriel Joaquín**
+
 
 ---
 
