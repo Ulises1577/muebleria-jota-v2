@@ -48,7 +48,7 @@ h3,
 .caption,
 small {
   font-family: var(--font-primary);
-  font-size: .75rem;
+  font-size: .85rem;
   font-weight: 300;
   letter-spacing: .02em;
 }

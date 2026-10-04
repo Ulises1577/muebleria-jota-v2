@@ -22,7 +22,7 @@
   --texto: var(--color-text-main);
   --texto-suave: var(--color-text-secondary);
   --superficie: var(--color-card-bg);
-  --navbar-siena: var(--siena-tostado);
+  --navbar-siena: #A0522D;
   --navbar-bg: rgba(245, 230, 211, .96);
   --navbar-text: var(--color-text-main);
   --navbar-border: var(--color-border);

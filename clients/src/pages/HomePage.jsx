@@ -138,6 +138,9 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
         </div>
       </section>
 
+      {/* Nueva sección Sostenibilidad */}
+      <Sostenibilidad />
+
       {/* Sección Historia Oficial */}
       <section className="history-section home-container" aria-labelledby="history-title" data-reveal>
         <div className="history-copy">
