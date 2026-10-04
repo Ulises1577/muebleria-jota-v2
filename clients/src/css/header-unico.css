@@ -7,6 +7,9 @@ header.site-header,
 header.nav-bar,
 .site-header,
 .nav-bar {
+  display: flex !important;
+
+  
   position: sticky !important;
   top: 0 !important;
   z-index: 900 !important;
