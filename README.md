@@ -126,7 +126,7 @@ A continuación se detallan las evidencias de las pruebas realizadas sobre los d
 
 ### 1. Obtener todos los productos
 Consulta general para listar el inventario completo.
-![GET Productos]./assets/postman-get-productos.png)
+![GET Productos](./assets/postman-get-productos.png)
 
 ### 2. Obtener producto por ID válido
 Consulta exitosa de un producto específico mediante su ID numérico.
