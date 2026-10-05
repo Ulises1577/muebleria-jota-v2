@@ -153,3 +153,9 @@ Comprobación de la respuesta de la API ante consultas vacías o sin resultados 
 #### 1. Obtener producto por ID desde Swagger
 Prueba de consulta de un producto específico ingresando un ID válido con respuesta exitosa.
 ![GET Producto por ID Swagger](./assets/swagger-get-producto-por-id.png)
+
+#### 2. Obtener producto todos los productos desde Swagger
+Prueba de consulta de un producto específico ingresando un ID válido con respuesta exitosa.
+![GET Producto Swagger](./assets/swagger-get-productos.png)
+
+
