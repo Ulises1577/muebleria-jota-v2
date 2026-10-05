@@ -65,12 +65,15 @@ npm run dev
 # O en modo producción
 npm start
 ```
-El servidor quedará disponible en: `http://localhost:5000`
+El servidor quedará disponible en: http://localhost:3000
 
-#### Endpoints de la API:
+#### Endpoints de la API y Documentación (Swagger): 
+- Documentación Interactiva (Swagger): Disponible en http://localhost:3000/api-docs/ para probar visualmente los endpoints.
 - `GET /` : Estado del servidor y mapa de endpoints.
 - `GET /api/productos` : Listado completo de muebles en formato JSON (admite `?search=`).
-- `GET /api/productos/:id` : Detalle de un mueble específico por ID (retorna 404 si no existe).
+- `GET /api/productos/:id` : Detalle de un mueble específico por ID (retorna 404 si no existe).  
+
+> ⚠️ **Nota de Configuración:** Dejamos las configuraciones en **`true`** intencionalmente porque estamos en un entorno académico y de aprendizaje. En producción, recuerden configurarlo siempre en **`false`**.
 
 ---
 
@@ -112,3 +115,42 @@ La interfaz implementa las especificaciones del **Manual de Marca Hermanos Jota 
 - **Frontend**: React 18, Vite, Hooks (`useState`, `useEffect`), CSS puro con variables y Grid/Flexbox, `localStorage`.
 - **Backend**: Node.js, Express, ES Modules (`import/export`), `express.Router`, `cors`, `dotenv`.
 - **Patrón de diseño**: MVC (Model-View-Controller) desacoplado mediante API REST.
+
+
+## 🧪 Pruebas y Endpoints (Postman)
+
+A continuación se detallan las evidencias de las pruebas realizadas sobre los diferentes endpoints de la API para asegurar su correcto funcionamiento:
+
+### 1. Obtener todos los productos
+Consulta general para listar el inventario completo.
+![GET Productos](./assets/testing/postman-get-productos.png)
+
+### 2. Obtener producto por ID válido
+Consulta exitosa de un producto específico mediante su ID numérico.
+![GET Producto por ID](./assets/testing/postman-get-producto-por-id.png)
+
+### 3. Manejo de error: ID no encontrado
+Validación cuando se busca un ID numérico que no existe en la base de datos (Retorna `404 Not Found`).
+![Producto no encontrado](./assets/testing/postman-get-producto-no-encontrado.png)
+
+### 4. Filtrado de productos mediante parámetros (`search`)
+Prueba de búsqueda por término utilizando query params.
+![Filtrar productos](./assets/testing/postman-get-productos-search.png)
+
+### 5. Manejo de error: ID con formato inválido
+Validación de entrada cuando se ingresan letras u otros caracteres en lugar de un número en el ID (Retorna `404 Not Found`).
+![ID inválido](./assets/testing/postman-get-producto-id-invalido.png)
+
+### 6. Búsqueda sin coincidencias o caracteres especiales
+Comprobación de la respuesta de la API ante consultas vacías o sin resultados (Devuelve una lista vacía con estado `200 OK`).
+![Búsqueda sin resultados](./assets/testing/postman-get-productos-search-vacio.png)
+
+### 📖 Pruebas en Swagger UI (Documentación Interactiva)
+
+#### 1. Listar productos desde Swagger
+Ejecución del endpoint general para comprobar la respuesta `200 OK` desde la interfaz web.
+![GET Productos Swagger](./assets/testing/swagger-get-productos.png)
+
+#### 2. Obtener producto por ID desde Swagger
+Prueba de consulta de un producto específico ingresando un ID válido con respuesta exitosa.
+![GET Producto por ID Swagger](./assets/testing/swagger-get-producto-por-id.png)
