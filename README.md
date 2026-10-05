@@ -126,34 +126,34 @@ A continuación se detallan las evidencias de las pruebas realizadas sobre los d
 
 ### 1. Obtener todos los productos
 Consulta general para listar el inventario completo.
-![GET Productos](./assets/testing/postman-get-productos.png)
+![GET Productos](./postman-get-productos.png)
 
 ### 2. Obtener producto por ID válido
 Consulta exitosa de un producto específico mediante su ID numérico.
-![GET Producto por ID](./assets/testing/postman-get-producto-por-id.png)
+![GET Producto por ID](./postman-get-producto-por-id.png)
 
 ### 3. Manejo de error: ID no encontrado
 Validación cuando se busca un ID numérico que no existe en la base de datos (Retorna `404 Not Found`).
-![Producto no encontrado](./assets/testing/postman-get-producto-no-encontrado.png)
+![Producto no encontrado](./postman-get-producto-no-encontrado.png)
 
 ### 4. Filtrado de productos mediante parámetros (`search`)
 Prueba de búsqueda por término utilizando query params.
-![Filtrar productos](./assets/testing/postman-get-productos-search.png)
+![Filtrar productos](./postman-get-productos-search.png)
 
 ### 5. Manejo de error: ID con formato inválido
 Validación de entrada cuando se ingresan letras u otros caracteres en lugar de un número en el ID (Retorna `404 Not Found`).
-![ID inválido](./assets/testing/postman-get-producto-id-invalido.png)
+![ID inválido](./postman-get-producto-id-invalido.png)
 
 ### 6. Búsqueda sin coincidencias o caracteres especiales
 Comprobación de la respuesta de la API ante consultas vacías o sin resultados (Devuelve una lista vacía con estado `200 OK`).
-![Búsqueda sin resultados](./assets/testing/postman-get-productos-search-vacio.png)
+![Búsqueda sin resultados](./postman-get-productos-search-vacio.png)
 
 ### 📖 Pruebas en Swagger UI (Documentación Interactiva)
 
 #### 1. Listar productos desde Swagger
 Ejecución del endpoint general para comprobar la respuesta `200 OK` desde la interfaz web.
-![GET Productos Swagger](./assets/testing/swagger-get-productos.png)
+![GET Productos Swagger](./swagger-get-productos.png)
 
 #### 2. Obtener producto por ID desde Swagger
 Prueba de consulta de un producto específico ingresando un ID válido con respuesta exitosa.
-![GET Producto por ID Swagger](./assets/testing/swagger-get-producto-por-id.png)
+![GET Producto por ID Swagger](./swagger-get-producto-por-id.png)
