@@ -149,6 +149,7 @@ Comprobación de la respuesta de la API ante consultas vacías o sin resultados 
 ![Búsqueda sin resultados](./assets/postman-get-productos-search-vacio.png)
 
 ### 📖 Pruebas en Swagger UI (Documentación Interactiva)
+Para acceder a la Documentacion Interactiva tienen que entrar a Swagger:  http://localhost:3000/api-docs
 
 #### 1. Obtener producto por ID desde Swagger
 Prueba de consulta de un producto específico ingresando un ID válido con respuesta exitosa.
