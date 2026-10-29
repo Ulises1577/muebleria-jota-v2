@@ -1,0 +1,11 @@
+{
+  "name": "muebleria-jota-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Scripts raíz para gestión de Mueblería Hermanos Jota",
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix clients install",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:clients": "npm --prefix clients run dev"
+  }
+}
