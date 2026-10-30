@@ -68,13 +68,16 @@ npm run dev
 # O en modo producción
 npm start
 ```
-El servidor quedará disponible en: http://localhost:3000
+El servidor quedará disponible en: http://localhost:5000
 
 #### Endpoints de la API y Documentación (Swagger): 
-- Documentación Interactiva (Swagger): Disponible en http://localhost:3000/api-docs/ para probar visualmente los endpoints.
+- Documentación Interactiva (Swagger): Disponible en http://localhost:5000/api-docs/ para probar visualmente los endpoints.
 - `GET /` : Estado del servidor y mapa de endpoints.
 - `GET /api/productos` : Listado completo de muebles en formato JSON (admite `?search=`).
-- `GET /api/productos/:id` : Detalle de un mueble específico por ID (retorna 404 si no existe).  
+- `GET /api/productos/:id` : Detalle de un mueble específico por ID (retorna 404 si no existe).
+- `POST /api/productos` : Crear un producto nuevo.
+- `PUT /api/productos/:id` : Actualizar producto.
+- `DELETE /api/productos/:id` : Eliminar producto.  
 
 > ⚠️ **Nota de Configuración:** Dejamos las configuraciones en **`true`** intencionalmente porque estamos en un entorno académico y de aprendizaje. En producción, recuerden configurarlo siempre en **`false`**.
 
@@ -149,7 +152,7 @@ Comprobación de la respuesta de la API ante consultas vacías o sin resultados 
 ![Búsqueda sin resultados](./assets/postman-get-productos-search-vacio.png)
 
 ### 📖 Pruebas en Swagger UI (Documentación Interactiva)
-Para acceder a la Documentacion Interactiva tienen que entrar a Swagger:  http://localhost:3000/api-docs
+Para acceder a la Documentacion Interactiva tienen que entrar a Swagger:  http://localhost:5000/api-docs
 
 #### 1. Obtener producto por ID desde Swagger
 Prueba de consulta de un producto específico ingresando un ID válido con respuesta exitosa.

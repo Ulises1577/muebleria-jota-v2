@@ -9,18 +9,26 @@ import { config } from './config/env.js';
 
 const app = express();
 
+const allowedOrigins = [config.clientUrl, config.frontendUrl].filter(Boolean);
 const corsOptions = {
-  origin: config.frontendUrl,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
 
-// Middlewares globales
+    callback(new Error('Origen no permitido por CORS'));
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
 app.use(cors(corsOptions));
-app.use(express.json()); // Habilitado para futuras peticiones POST/PUT
+app.options('*', cors(corsOptions));
+app.use(express.json());
 app.use(requestLogger);
 
-// Ruta de estado / bienvenida
 app.get('/', (req, res) => {
   res.json({
     name: 'Mueblería Hermanos Jota API',
@@ -39,24 +47,48 @@ const swaggerOptions = {
     info: {
       title: 'API Mueblería Jota',
       version: '1.0.0',
-      description: 'Documentación del backend de Mueblería Jota',
+      description: 'Documentación del backend de Mueblería Jota'
     },
     servers: [
-      {
-        url: 'http://localhost:3000', // Actualizado al puerto correcto
-      },
+      { url: `http://localhost:${config.port}` },
+      { url: 'https://<app-name>.onrender.com' }
     ],
+    tags: [{ name: 'Productos', description: 'Gestión de productos del catálogo' }],
+    components: {
+      schemas: {
+        Product: {
+          type: 'object',
+          required: ['nombre', 'precio'],
+          properties: {
+            _id: { type: 'string', description: 'ID del producto' },
+            nombre: { type: 'string', description: 'Nombre del producto' },
+            descripcion: { type: 'string', description: 'Descripción' },
+            precio: { type: 'number', description: 'Precio' },
+            stock: { type: 'integer', description: 'Stock disponible' },
+            imagenUrl: { type: 'string', description: 'URL de la imagen' }
+          }
+        },
+        ProductInput: {
+          type: 'object',
+          required: ['nombre', 'precio'],
+          properties: {
+            nombre: { type: 'string' },
+            descripcion: { type: 'string' },
+            precio: { type: 'number' },
+            stock: { type: 'integer' },
+            imagenUrl: { type: 'string' }
+          }
+        }
+      }
+    }
   },
-  apis: ['./src/routes/*.js'],
+  apis: ['./src/routes/*.js']
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Montaje de rutas de la API
 app.use('/api/productos', productRoutes);
-
-// Manejadores de 404 y Errores
 app.use(notFoundHandler);
 app.use(errorHandler);
 
