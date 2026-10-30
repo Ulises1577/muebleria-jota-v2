@@ -21,4 +21,5 @@ export const errorHandler = (err, req, res, next) => {
     success: false,
     message: err.message || 'Error interno del servidor',
     ...(config.nodeEnv === 'development' && { stack: err.stack }),
-  })};
+  });
+};
