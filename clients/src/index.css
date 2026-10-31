@@ -11,6 +11,7 @@
 @import './css/footer.css';
 @import './css/polish.css';
 @import './css/header-unico.css';
+@import './css/auth-panels.css';
 
 /* Ajustes mínimos para integración fluida de React */
 #root {

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const CartModal = ({ isOpen, onClose, cart = [], onUpdateQuantity, onRemoveItem, onClearCart }) => {
+export const CartModal = ({ isOpen, onClose, cart = [], onUpdateQuantity, onRemoveItem, onClearCart, onCheckout }) => {
   if (!isOpen) return null;
 
   const total = cart.reduce((acc, item) => acc + (item.precio * item.quantity), 0);
@@ -106,7 +106,7 @@ export const CartModal = ({ isOpen, onClose, cart = [], onUpdateQuantity, onRemo
                 type="button"
                 className="btn-detalle"
                 style={{ flex: 2, padding: '0.6rem' }}
-                onClick={() => alert(`¡Gracias por tu compra! Procesando pedido por ${formattedTotal}`)}
+                onClick={() => onCheckout ? onCheckout(cart, total) : alert(`¡Gracias por tu compra! Procesando pedido por ${formattedTotal}`)}
               >
                 Finalizar Compra
               </button>

@@ -28,6 +28,16 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ['usuario', 'admin'],
       default: 'usuario'
+    },
+    telefono: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    direccion: {
+      type: String,
+      trim: true,
+      default: ''
     }
   },
   {
@@ -64,6 +74,8 @@ const fallbackUsers = [
     email: 'admin@hermanosjota.com',
     password: seedPassword,
     rol: 'admin',
+    telefono: '',
+    direccion: '',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
@@ -73,6 +85,8 @@ const fallbackUsers = [
     email: 'cliente@hermanosjota.com',
     password: seedPassword,
     rol: 'usuario',
+    telefono: '',
+    direccion: '',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   }
@@ -141,6 +155,8 @@ export const UserModel = {
       email: userData.email.toLowerCase(),
       password: hashedPassword,
       rol: userData.rol || 'usuario',
+      telefono: userData.telefono || '',
+      direccion: userData.direccion || '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -149,5 +165,57 @@ export const UserModel = {
 
     const { password, ...userWithoutPassword } = newUser;
     return userWithoutPassword;
+  },
+
+  async updateById(id, updates) {
+    const allowed = {};
+    if (typeof updates.nombre === 'string') allowed.nombre = updates.nombre.trim();
+    if (typeof updates.telefono === 'string') allowed.telefono = updates.telefono.trim();
+    if (typeof updates.direccion === 'string') allowed.direccion = updates.direccion.trim();
+
+    if (mongoose.connection.readyState === 1) {
+      return User.findByIdAndUpdate(id, allowed, {
+        new: true,
+        runValidators: true
+      }).select('-password').lean();
+    }
+
+    const index = fallbackUsers.findIndex((user) => String(user._id) === String(id));
+    if (index === -1) return null;
+
+    fallbackUsers[index] = {
+      ...fallbackUsers[index],
+      ...allowed,
+      updatedAt: new Date().toISOString()
+    };
+
+    const { password, ...userWithoutPassword } = fallbackUsers[index];
+    return userWithoutPassword;
+  },
+
+  async ensureSeedUsers() {
+    if (mongoose.connection.readyState !== 1) return;
+
+    const seeds = [
+      {
+        nombre: 'Administrador Jota',
+        email: 'admin@hermanosjota.com',
+        password: '123456',
+        rol: 'admin'
+      },
+      {
+        nombre: 'Cliente Demo',
+        email: 'cliente@hermanosjota.com',
+        password: '123456',
+        rol: 'usuario'
+      }
+    ];
+
+    for (const seed of seeds) {
+      const exists = await User.findOne({ email: seed.email });
+      if (!exists) {
+        await User.create(seed);
+      }
+    }
   }
 };

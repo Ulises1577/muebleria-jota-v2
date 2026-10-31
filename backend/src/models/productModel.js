@@ -27,6 +27,11 @@ const productSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: ''
+    },
+    categoria: {
+      type: String,
+      trim: true,
+      default: 'Colección'
     }
   },
   {
@@ -37,11 +42,21 @@ const productSchema = new mongoose.Schema(
 
 export const Product = mongoose.model('Product', productSchema);
 
+const defaultStockById = (id) => {
+  const numericId = Number(id);
+  if (numericId === 5) return 0;
+  if (numericId === 3 || numericId === 9) return 2;
+  if (numericId === 7) return 1;
+  return 8;
+};
+
 const fallbackProducts = [...products].map((product) => ({
   ...product,
   _id: String(product.id),
-  imagenUrl: product.imagen || '',
-  stock: product.stock ?? 0,
+  imagenUrl: product.imagenUrl || product.imagen || '',
+  imagen: product.imagen || product.imagenUrl || '',
+  stock: product.stock ?? defaultStockById(product.id),
+  categoria: product.categoria || 'Colección',
   descripcion: product.descripcion || ''
 }));
 
@@ -84,7 +99,9 @@ export const ProductModel = {
       descripcion: productData.descripcion || '',
       precio: Number(productData.precio),
       stock: Number(productData.stock || 0),
+      categoria: productData.categoria || 'Colección',
       imagenUrl: productData.imagenUrl || '',
+      imagen: productData.imagenUrl || '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

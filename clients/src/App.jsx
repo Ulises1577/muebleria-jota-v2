@@ -2,24 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { CartModal } from './components/CartModal';
+import { LoginModal } from './components/LoginModal';
 import { HomePage } from './pages/HomePage';
 import { CatalogPage } from './pages/CatalogPage';
 import { DetailPage } from './pages/DetailPage';
 import { ContactPage } from './pages/ContactPage';
+import { AdminPage } from './pages/AdminPage';
+import { UserProfilePage } from './pages/UserProfilePage';
 import { productService } from './services/productService';
+import { authService } from './services/authService';
 import './App.css';
 
+const ORDERS_KEY_PREFIX = 'hermanos_jota_orders_';
+
 export function App() {
-  // 1. Estado de productos y ciclo de vida de la petición a la API (Sprint 3 y 4)
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 2. Estado de navegación y renderizado condicional de vistas
-  const [currentView, setCurrentView] = useState('home'); // 'home' | 'catalog' | 'detail' | 'contact'
+  const [currentView, setCurrentView] = useState('home');
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const [contactPrefill, setContactPrefill] = useState(null);
 
-  // 3. Estado del carrito de compras (elevado en App.jsx con persistencia en localStorage)
+  const [user, setUser] = useState(() => authService.getUser());
+  const [token, setToken] = useState(() => authService.getToken());
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem('hermanos_jota_cart');
@@ -29,8 +37,8 @@ export function App() {
     }
   });
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
 
-  // Sincronización del carrito con localStorage
   useEffect(() => {
     try {
       localStorage.setItem('hermanos_jota_cart', JSON.stringify(cart));
@@ -39,7 +47,6 @@ export function App() {
     }
   }, [cart]);
 
-  // Carga inicial del catálogo consumiendo la API de Express
   useEffect(() => {
     let isMounted = true;
     setIsLoading(true);
@@ -64,20 +71,56 @@ export function App() {
     };
   }, []);
 
-  // Navegación entre vistas
-  const handleNavigate = (view) => {
+  useEffect(() => {
+    let isMounted = true;
+    const storedToken = authService.getToken();
+    if (!storedToken) return undefined;
+
+    authService.me()
+      .then((currentUser) => {
+        if (!isMounted) return;
+        setUser(currentUser);
+        setToken(storedToken);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        authService.logout();
+        setUser(null);
+        setToken(null);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleNavigate = (view, prefill = null) => {
+    if (view === 'admin' && user?.rol !== 'admin') {
+      if (!user) {
+        setIsLoginOpen(true);
+        return;
+      }
+      setCurrentView('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (view === 'profile' && !user) {
+      setIsLoginOpen(true);
+      return;
+    }
+
+    setContactPrefill(view === 'contact' ? prefill : null);
     setCurrentView(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Selección de producto para detalle condicional
   const handleSelectProduct = (id) => {
     setSelectedProductId(id);
     setCurrentView('detail');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Operaciones del Carrito
   const handleAddToCart = (product, quantity = 1) => {
     setCart((prevCart) => {
       const existing = prevCart.find((item) => item.id === product.id);
@@ -112,10 +155,59 @@ export function App() {
     setCart([]);
   };
 
-  // Total de unidades para pasar por props a la Navbar
+  const handleCheckout = (orderCart, total) => {
+    const userId = user?._id || user?.id;
+    if (userId) {
+      try {
+        const key = `${ORDERS_KEY_PREFIX}${userId}`;
+        const previous = JSON.parse(localStorage.getItem(key) || '[]');
+        const order = {
+          id: Date.now(),
+          date: new Date().toISOString(),
+          items: orderCart.map((item) => ({
+            id: item.id,
+            nombre: item.nombre,
+            quantity: item.quantity,
+            precio: item.precio
+          })),
+          total
+        };
+        localStorage.setItem(key, JSON.stringify([order, ...previous]));
+      } catch (storageError) {
+        console.error('No se pudo guardar el historial de pedidos:', storageError);
+      }
+    }
+
+    setCart([]);
+    setIsCartOpen(false);
+    setToastMessage('Recibimos tu pedido. El taller te contactará para coordinar el despacho.');
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const reloadProducts = async () => {
+    const data = await productService.getProducts();
+    setProducts(data);
+    return data;
+  };
+
+  const handleAuthSuccess = ({ user: nextUser, token: nextToken }) => {
+    setUser(nextUser);
+    setToken(nextToken);
+    setIsLoginOpen(false);
+    setCurrentView(nextUser.rol === 'admin' ? 'admin' : 'profile');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    setUser(null);
+    setToken(null);
+    setCurrentView('home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  // Renderizado condicional de la vista activa (Requisito Sprint 3 y 4)
   const renderCurrentView = () => {
     switch (currentView) {
       case 'home':
@@ -147,7 +239,36 @@ export function App() {
           />
         );
       case 'contact':
-        return <ContactPage />;
+        return <ContactPage prefill={contactPrefill} />;
+      case 'admin':
+        return user?.rol === 'admin'
+          ? <AdminPage products={products} onProductsChange={reloadProducts} />
+          : (
+            <HomePage
+              products={products}
+              onSelectProduct={handleSelectProduct}
+              onAddToCart={handleAddToCart}
+              onNavigate={handleNavigate}
+            />
+          );
+      case 'profile':
+        return user
+          ? (
+            <UserProfilePage
+              user={user}
+              onUserUpdate={setUser}
+              onLogout={handleLogout}
+              onNavigate={handleNavigate}
+            />
+          )
+          : (
+            <HomePage
+              products={products}
+              onSelectProduct={handleSelectProduct}
+              onAddToCart={handleAddToCart}
+              onNavigate={handleNavigate}
+            />
+          );
       default:
         return (
           <HomePage
@@ -162,23 +283,22 @@ export function App() {
 
   return (
     <div className="app-container">
-      {/* Navbar oficial con contador dinámico vía props */}
       <Navbar
         cartCount={totalCartCount}
         currentView={currentView}
         onNavigate={handleNavigate}
         onOpenCart={() => setIsCartOpen(true)}
+        user={user}
+        onOpenLogin={() => setIsLoginOpen(true)}
+        onLogout={handleLogout}
       />
 
-      {/* Vista renderizada dinámicamente con su semántica original */}
       <div className="app-view-container">
         {renderCurrentView()}
       </div>
 
-      {/* Footer corporativo oficial */}
       <Footer onNavigate={handleNavigate} />
 
-      {/* Modal del Carrito */}
       <CartModal
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
@@ -186,7 +306,36 @@ export function App() {
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveFromCart}
         onClearCart={handleClearCart}
+        onCheckout={handleCheckout}
       />
+
+      <LoginModal
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        onAuthSuccess={handleAuthSuccess}
+      />
+
+      {toastMessage && (
+        <div className="toast-container" aria-live="polite">
+          <div className="custom-toast" style={{
+            backgroundColor: 'var(--siena-tostado)',
+            color: '#fff',
+            padding: '1rem 1.5rem',
+            borderRadius: '8px',
+            boxShadow: 'var(--shadow-md)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            zIndex: 1000
+          }}>
+            <span>✓</span>
+            <span>{toastMessage}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
