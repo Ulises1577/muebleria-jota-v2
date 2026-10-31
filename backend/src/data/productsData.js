@@ -12,7 +12,7 @@ export const products = [
     materiales: "Nogal macizo FSC®, herrajes de latón",
     precio: 850000,
     categoria: "Almacenamiento",
-    imagen: "/assets/Aparador Uspallata.png",
+    imagenUrl: "/assets/Aparador Uspallata.png",
     especificaciones: {
       "Medidas": "180 × 45 × 75 cm",
       "Materiales": "Nogal macizo FSC®, herrajes de latón",
@@ -32,7 +32,7 @@ export const products = [
     materiales: "Estructura de acero, estantes de roble",
     precio: 620000,
     categoria: "Almacenamiento",
-    imagen: "/assets/Biblioteca Recoleta.png",
+    imagenUrl: "/assets/Biblioteca Recoleta.png",
     especificaciones: {
       "Medidas": "100 × 35 × 200 cm",
       "Materiales": "Estructura de acero, estantes de roble",
@@ -52,7 +52,7 @@ export const products = [
     materiales: "Guatambú macizo, tela bouclé",
     precio: 480000,
     categoria: "Asientos",
-    imagen: "/assets/Butaca Mendoza.png",
+    imagenUrl: "/assets/Butaca Mendoza.png",
     especificaciones: {
       "Medidas": "80 × 75 × 85 cm",
       "Materiales": "Guatambú macizo, tela bouclé",
@@ -72,7 +72,7 @@ export const products = [
     materiales: "Cuero curtido vegetal, acero pintado",
     precio: 750000,
     categoria: "Asientos",
-    imagen: "/assets/Sillón Copacabana.png",
+    imagenUrl: "/assets/Sillón Copacabana.png",
     especificaciones: {
       "Medidas": "90 × 85 × 95 cm",
       "Materiales": "Cuero curtido vegetal, acero pintado",
@@ -92,7 +92,7 @@ export const products = [
     materiales: "Sobre de mármol Patagonia, patas de nogal",
     precio: 390000,
     categoria: "Mesas",
-    imagen: "/assets/Mesa de Centro Araucaria.png",
+    imagenUrl: "/assets/Mesa de Centro Araucaria.png",
     especificaciones: {
       "Medidas": "90 × 90 × 45 cm",
       "Materiales": "Sobre de mármol Patagonia, patas de nogal",
@@ -112,7 +112,7 @@ export const products = [
     materiales: "Roble macizo FSC®, herrajes soft-close",
     precio: 280000,
     categoria: "Dormitorio",
-    imagen: "/assets/Mesa de Noche Aconcagua.png",
+    imagenUrl: "/assets/Mesa de Noche Aconcagua.png",
     especificaciones: {
       "Medidas": "45 × 35 × 60 cm",
       "Materiales": "Roble macizo FSC®, herrajes soft-close",
@@ -131,7 +131,7 @@ export const products = [
     materiales: "Madera de eucalipto certificada FSC®, Lino natural",
     precio: 1200000,
     categoria: "Asientos",
-    imagen: "/assets/Sofá Patagonia.png",
+    imagenUrl: "/assets/Sofá Patagonia.png",
     especificaciones: {
       "Medidas": "220 × 90 × 80 cm",
       "Estructura": "Madera de eucalipto certificada FSC®",
@@ -151,7 +151,7 @@ export const products = [
     materiales: "Roble macizo FSC®, mecanismo alemán",
     precio: 950000,
     categoria: "Mesas",
-    imagen: "/assets/Mesa Comedor Pampa.png",
+    imagenUrl: "/assets/Mesa Comedor Pampa.png",
     especificaciones: {
       "Medidas": "160-240 × 90 × 75 cm",
       "Materiales": "Roble macizo FSC®, mecanismo alemán",
@@ -171,7 +171,7 @@ export const products = [
     materiales: "Contrachapado nogal, tubo de acero",
     precio: 340000,
     categoria: "Asientos",
-    imagen: "/assets/Sillas Córdoba.png",
+    imagenUrl: "/assets/Sillas Córdoba.png",
     especificaciones: {
       "Medidas": "45 × 52 × 80 cm (cada una)",
       "Materiales": "Contrachapado nogal, tubo de acero",
@@ -191,7 +191,7 @@ export const products = [
     materiales: "Bambú laminado, herrajes ocultos",
     precio: 510000,
     categoria: "Oficina",
-    imagen: "/assets/Escritorio Costa.png",
+    imagenUrl: "/assets/Escritorio Costa.png",
     especificaciones: {
       "Medidas": "120 × 60 × 75 cm",
       "Materiales": "Bambú laminado, herrajes ocultos",
@@ -211,7 +211,7 @@ export const products = [
     materiales: "Malla técnica, tejido reciclado",
     precio: 420000,
     categoria: "Oficina",
-    imagen: "/assets/Silla de Trabajo Belgrano.png",
+    imagenUrl: "/assets/Silla de Trabajo Belgrano.png",
     especificaciones: {
       "Medidas": "60 × 60 × 90-100 cm",
       "Materiales": "Malla técnica, tejido reciclado",
