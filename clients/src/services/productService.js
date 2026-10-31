@@ -1,4 +1,39 @@
+import { authService } from './authService';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/productos';
+
+const normalizeProduct = (product) => {
+  if (!product) return product;
+
+  return {
+    ...product,
+    id: product.id ?? product._id,
+    imagen: product.imagen || product.imagenUrl || '',
+    imagenUrl: product.imagenUrl || product.imagen || '',
+    categoria: product.categoria || 'Colección',
+    stock: Number(product.stock ?? 0)
+  };
+};
+
+const parseResponse = async (response, fallbackMessage) => {
+  let payload = null;
+  try {
+    payload = await response.json();
+  } catch {
+    payload = null;
+  }
+
+  if (!response.ok) {
+    throw new Error(payload?.message || fallbackMessage);
+  }
+
+  return payload;
+};
+
+const withAuthHeaders = (extra = {}) => ({
+  ...extra,
+  ...authService.getAuthHeaders()
+});
 
 /**
  * Servicio para consultar el catálogo de productos a la API de Express
@@ -13,12 +48,8 @@ export const productService = {
     const url = search ? `${API_URL}?search=${encodeURIComponent(search)}` : API_URL;
     const response = await fetch(url);
 
-    if (!response.ok) {
-      throw new Error(`Error ${response.status}: No se pudieron cargar los productos`);
-    }
-
-    const result = await response.json();
-    return result.data || [];
+    const result = await parseResponse(response, `Error ${response.status}: No se pudieron cargar los productos`);
+    return (result.data || []).map(normalizeProduct);
   },
 
   /**
@@ -29,14 +60,43 @@ export const productService = {
   async getProductById(id) {
     const response = await fetch(`${API_URL}/${id}`);
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error('El mueble solicitado no existe en nuestro catálogo');
-      }
-      throw new Error(`Error ${response.status}: No se pudo cargar el detalle del producto`);
+    if (!response.ok && response.status === 404) {
+      throw new Error('El mueble solicitado no existe en nuestro catálogo');
     }
 
-    const result = await response.json();
-    return result.data;
+    const result = await parseResponse(response, `Error ${response.status}: No se pudo cargar el detalle del producto`);
+    return normalizeProduct(result.data);
+  },
+
+  async createProduct(productData) {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: withAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(productData)
+    });
+
+    const result = await parseResponse(response, 'No se pudo crear el mueble.');
+    return normalizeProduct(result.data);
+  },
+
+  async updateProduct(id, productData) {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: withAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(productData)
+    });
+
+    const result = await parseResponse(response, 'No se pudo actualizar el mueble.');
+    return normalizeProduct(result.data);
+  },
+
+  async deleteProduct(id) {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'DELETE',
+      headers: withAuthHeaders()
+    });
+
+    const result = await parseResponse(response, 'No se pudo eliminar el mueble.');
+    return result.data ? normalizeProduct(result.data) : result;
   }
 };

@@ -93,5 +93,6 @@ router.post('/login', (req, res, next) => AuthController.login(req, res, next));
  *         description: Token inválido o ausente
  */
 router.get('/me', verifyToken, (req, res, next) => AuthController.me(req, res, next));
+router.put('/me', verifyToken, (req, res, next) => AuthController.updateMe(req, res, next));
 
 export default router;

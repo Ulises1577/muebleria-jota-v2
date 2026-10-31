@@ -77,7 +77,9 @@ export const AuthController = {
             _id: newUser._id,
             nombre: newUser.nombre,
             email: newUser.email,
-            rol: newUser.rol
+            rol: newUser.rol,
+            telefono: newUser.telefono || '',
+            direccion: newUser.direccion || ''
           },
           token
         }
@@ -138,7 +140,9 @@ export const AuthController = {
             _id: user._id,
             nombre: user.nombre,
             email: user.email,
-            rol: user.rol
+            rol: user.rol,
+            telefono: user.telefono || '',
+            direccion: user.direccion || ''
           },
           token
         }
@@ -166,6 +170,44 @@ export const AuthController = {
       return res.status(200).json({
         success: true,
         data: user
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
+   * PUT /api/auth/me
+   * Actualiza datos de contacto y dirección de despacho del usuario autenticado.
+   */
+  async updateMe(req, res, next) {
+    try {
+      const { nombre, telefono, direccion } = req.body || {};
+
+      if (nombre !== undefined && !String(nombre).trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'El nombre es obligatorio.'
+        });
+      }
+
+      const updatedUser = await UserModel.updateById(req.user.id, {
+        nombre,
+        telefono,
+        direccion
+      });
+
+      if (!updatedUser) {
+        return res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado.'
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: 'Perfil actualizado.',
+        data: updatedUser
       });
     } catch (error) {
       next(error);

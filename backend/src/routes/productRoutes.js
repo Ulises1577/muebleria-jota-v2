@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { ProductController } from '../controllers/productController.js';
+import { requireAdmin, verifyToken } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
@@ -89,7 +90,7 @@ const router = Router();
  *         description: Datos inválidos
  */
 router.get('/', (req, res, next) => ProductController.getProducts(req, res, next));
-router.post('/', (req, res, next) => ProductController.createProduct(req, res, next));
+router.post('/', verifyToken, requireAdmin, (req, res, next) => ProductController.createProduct(req, res, next));
 
 /**
  * @swagger
@@ -151,7 +152,7 @@ router.post('/', (req, res, next) => ProductController.createProduct(req, res, n
  *         description: Producto no encontrado
  */
 router.get('/:id', (req, res, next) => ProductController.getProductById(req, res, next));
-router.put('/:id', (req, res, next) => ProductController.updateProduct(req, res, next));
-router.delete('/:id', (req, res, next) => ProductController.deleteProduct(req, res, next));
+router.put('/:id', verifyToken, requireAdmin, (req, res, next) => ProductController.updateProduct(req, res, next));
+router.delete('/:id', verifyToken, requireAdmin, (req, res, next) => ProductController.deleteProduct(req, res, next));
 
 export default router;

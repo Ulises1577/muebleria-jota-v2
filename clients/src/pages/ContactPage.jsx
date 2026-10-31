@@ -1,7 +1,7 @@
 import React from 'react';
 import { ContactForm } from '../components/ContactForm';
 
-export const ContactPage = () => {
+export const ContactPage = ({ prefill = null }) => {
   return (
     <main>
       <section className="contacto-hero">
@@ -50,7 +50,7 @@ export const ContactPage = () => {
           </aside>
 
           {/* Formulario de Contacto */}
-          <ContactForm />
+          <ContactForm initialValues={prefill} />
         </div>
       </section>
     </main>

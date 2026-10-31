@@ -2,6 +2,7 @@ import dns from 'node:dns';
 import mongoose from 'mongoose';
 import app from './src/app.js';
 import { config } from './src/config/env.js';
+import { UserModel } from './src/models/userModel.js';
 
 const PORT = config.port;
 

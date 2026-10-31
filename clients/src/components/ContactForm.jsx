@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-export const ContactForm = () => {
+export const ContactForm = ({ initialValues = null }) => {
   // Estado controlado del formulario con useState (Requisito Sprint 3 y 4)
   const [formData, setFormData] = useState({
-    nombre: '',
-    email: '',
-    mensaje: ''
+    nombre: initialValues?.nombre || '',
+    email: initialValues?.email || '',
+    mensaje: initialValues?.mensaje || ''
   });
 
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    if (!initialValues) return;
+    setFormData({
+      nombre: initialValues.nombre || '',
+      email: initialValues.email || '',
+      mensaje: initialValues.mensaje || ''
+    });
+  }, [initialValues]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
