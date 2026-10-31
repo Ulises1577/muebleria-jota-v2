@@ -12,7 +12,10 @@ const app = express();
 const allowedOrigins = [config.clientUrl, config.frontendUrl, 'http://localhost:5000', 'http://127.0.0.1:5000'].filter(Boolean);
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    const isLocalDevelopmentOrigin = config.nodeEnv === 'development'
+      && /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin || '');
+
+    if (!origin || allowedOrigins.includes(origin) || isLocalDevelopmentOrigin) {
       callback(null, true);
       return;
     }
