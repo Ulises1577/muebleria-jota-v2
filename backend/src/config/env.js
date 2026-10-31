@@ -10,6 +10,7 @@ export const config = {
   port: Number(process.env.PORT) || 5000,
   nodeEnv: process.env.NODE_ENV || 'development',
   mongoUri: process.env.MONGODB_URI || '',
+  jwtSecret: process.env.JWT_SECRET || 'dev_fallback_secret_hermanos_jota',
   dnsServers: (process.env.DNS_SERVERS || '')
     .split(',')
     .map((server) => server.trim())
