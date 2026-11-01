@@ -19,6 +19,8 @@ const connectDatabase = async () => {
 
   await mongoose.connect(config.mongoUri);
   console.log('MongoDB conectado correctamente');
+  await UserModel.ensureSeedUsers();
+  console.log('Usuarios semilla verificados (admin y cliente demo)');
 };
 
 const startServer = async () => {
