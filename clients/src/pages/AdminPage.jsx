@@ -9,12 +9,12 @@ const formatPrice = (value) => Number(value || 0).toLocaleString('es-AR', {
 });
 
 const getStockBadge = (stock) => {
-  if (stock <= 0) return { label: 'Agotado', className: 'stock-badge stock-badge--out' };
-  if (stock <= 3) return { label: 'Últimas unidades', className: 'stock-badge stock-badge--low' };
-  return { label: 'En stock', className: 'stock-badge stock-badge--ok' };
+  if (stock <= 0) return { label: '0 un. · Agotado', className: 'stock-badge stock-badge--out' };
+  if (stock <= 3) return { label: `${stock} un. · Últimas`, className: 'stock-badge stock-badge--low' };
+  return { label: `${stock} un. · En stock`, className: 'stock-badge stock-badge--ok' };
 };
 
-export const AdminPage = ({ products = [], onProductsChange }) => {
+export const AdminPage = ({ products = [], onProductsChange, onNavigate }) => {
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -48,6 +48,10 @@ export const AdminPage = ({ products = [], onProductsChange }) => {
   }, [products]);
 
   const openCreate = () => {
+    if (onNavigate) {
+      onNavigate('admin-create');
+      return;
+    }
     setEditingProduct(null);
     setFormOpen(true);
   };
@@ -179,6 +183,7 @@ export const AdminPage = ({ products = [], onProductsChange }) => {
                           className="admin-thumb"
                           src={product.imagen || product.imagenUrl}
                           alt={product.nombre}
+                          onError={(event) => { event.currentTarget.style.visibility = 'hidden'; }}
                         />
                       </td>
                       <td>
