@@ -5,9 +5,12 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/produ
 const normalizeProduct = (product) => {
   if (!product) return product;
 
+  const resolvedId = product._id ?? product.id;
+
   return {
     ...product,
-    id: product.id ?? product._id,
+    id: resolvedId,
+    _id: resolvedId,
     imagen: product.imagen || product.imagenUrl || '',
     imagenUrl: product.imagenUrl || product.imagen || '',
     categoria: product.categoria || 'Colección',
@@ -80,7 +83,7 @@ export const productService = {
       body: JSON.stringify(productData)
     });
 
-    const result = await parseResponse(response, 'No se pudo crear el mueble.');
+    const result = await parseResponse(response, 'No se pudo crear el producto.');
     return normalizeProduct(result.data);
   },
 
@@ -91,7 +94,7 @@ export const productService = {
       body: JSON.stringify(productData)
     });
 
-    const result = await parseResponse(response, 'No se pudo actualizar el mueble.');
+    const result = await parseResponse(response, 'No se pudo actualizar el producto.');
     return normalizeProduct(result.data);
   },
 
@@ -101,7 +104,7 @@ export const productService = {
       headers: withAuthHeaders()
     });
 
-    const result = await parseResponse(response, 'No se pudo eliminar el mueble.');
+    const result = await parseResponse(response, 'No se pudo eliminar el producto.');
     return result.data ? normalizeProduct(result.data) : result;
   }
 };

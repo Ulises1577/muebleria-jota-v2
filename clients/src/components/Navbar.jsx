@@ -6,12 +6,20 @@ export const Navbar = ({
   onNavigate,
   onOpenCart,
   user,
+  isAdmin,
   onOpenLogin,
   onLogout
 }) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
+
+  // Un usuario es admin ÚNICAMENTE si está autenticado y tiene rol 'admin'
+  const isUserAdmin = Boolean(
+    isAdmin !== undefined
+      ? (isAdmin && Boolean(user))
+      : Boolean(user && (user.role === 'admin' || user.rol === 'admin' || user.isAdmin))
+  );
 
   const handleLinkClick = (view, e) => {
     e.preventDefault();
@@ -31,7 +39,7 @@ export const Navbar = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const initials = (user?.nombre || 'HJ')
+  const initials = (user?.nombre || 'U')
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
@@ -120,18 +128,10 @@ export const Navbar = ({
               </button>
               {isUserMenuOpen && (
                 <div className="user-dropdown" role="menu">
-                  <button type="button" onClick={(e) => handleLinkClick('profile', e)}>
-                    Mi Perfil
-                  </button>
-                  {user.rol === 'admin' && (
-                    <>
-                      <button type="button" onClick={(e) => handleLinkClick('admin', e)}>
-                        Panel Admin
-                      </button>
-                      <button type="button" onClick={(e) => handleLinkClick('admin-create', e)}>
-                        Nuevo mueble
-                      </button>
-                    </>
+                  {isUserAdmin && (
+                    <button type="button" onClick={(e) => handleLinkClick('admin', e)}>
+                      Gestionar mis productos
+                    </button>
                   )}
                   <button
                     type="button"
@@ -147,25 +147,45 @@ export const Navbar = ({
             </div>
           ) : (
             <button type="button" className="session-button" onClick={onOpenLogin}>
-              Ingresar
+              Iniciar Sesión
             </button>
           )}
 
-          <button
-            type="button"
-            className="cart-button"
-            aria-label="Cantidad de productos en el carrito"
-            onClick={onOpenCart}
-          >
-            <svg className="cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <path d="M16 10a4 4 0 0 1-8 0"/>
-            </svg>
-            <span className={`cart-badge ${cartCount > 0 ? 'bump' : ''}`} data-cart-count aria-live="polite">
-              {cartCount}
-            </span>
-          </button>
+          {isUserAdmin ? (
+            <button
+              type="button"
+              className="session-button admin-manage-btn"
+              onClick={() => onNavigate('admin')}
+            >
+              Gestionar mis productos
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="cart-button"
+              aria-label="Cantidad de productos en el carrito"
+              onClick={onOpenCart}
+            >
+              <svg className="cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+              <span className={`cart-badge ${cartCount > 0 ? 'bump' : ''}`} data-cart-count aria-live="polite">
+                {cartCount}
+              </span>
+            </button>
+          )}
+
+          {user && (
+            <button
+              type="button"
+              className="session-button logout-btn"
+              onClick={onLogout}
+            >
+              Cerrar Sesión
+            </button>
+          )}
         </div>
       </div>
     </header>

@@ -18,12 +18,6 @@ export const ContactPage = ({ prefill = null }) => {
         <div className="contenedor contacto-grid">
           {/* Panel Lateral Institucional */}
           <aside className="panel-info" aria-label="Información de contacto">
-            <div className="panel-info__esquinas" aria-hidden="true">
-              <span className="esquina esquina--tl"></span>
-              <span className="esquina esquina--tr"></span>
-              <span className="esquina esquina--bl"></span>
-              <span className="esquina esquina--br"></span>
-            </div>
             <h2>Taller Hermanos Jota</h2>
             <p className="panel-info__desc">
               Trabajamos con stock reducido de piezas listas y producción a medida. Contanos tu proyecto y te contamos los tiempos reales.
@@ -38,19 +32,18 @@ export const ContactPage = ({ prefill = null }) => {
                 <dd>Lunes a viernes 10 a 19 hs, sábados 10 a 14 hs</dd>
               </div>
               <div>
-                <dt>Email</dt>
-                <dd>info@hermanosjota.com.ar</dd>
+                <dt>Teléfono directo</dt>
+                <dd>+54 11 4892-3001</dd>
               </div>
               <div>
-                <dt>WhatsApp</dt>
-                <dd>+54 11 4567-8900</dd>
+                <dt>Correo electrónico</dt>
+                <dd>contacto@hermanosjota.com.ar</dd>
               </div>
             </dl>
-            <p className="panel-info__firma">- La familia Jota</p>
           </aside>
 
-          {/* Formulario de Contacto */}
-          <ContactForm initialValues={prefill} />
+          {/* Formulario */}
+          <ContactForm prefill={prefill} />
         </div>
       </section>
     </main>
