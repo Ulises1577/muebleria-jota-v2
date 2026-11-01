@@ -143,7 +143,7 @@
   overflow: hidden;
   background: var(--color-card-bg);
   border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-md);
+  border-radius: .20rem;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
@@ -182,10 +182,11 @@
 
 .producto-categoria {
   margin-bottom: .25rem;
-  color: var(--verde-salvia-dark);
-  font-size: .8rem;
-  font-weight: 500;
-  letter-spacing: .02em;
+  color: var(--siena-tostado-hover);
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
 }
 
 .producto-info h3 {
@@ -212,7 +213,7 @@
 
 .producto-precio {
   margin-bottom: 1rem;
-  color: var(--color-text-main);
+  color: var(--siena-tostado);
   font-size: 1.2rem;
   font-weight: 700;
 }
