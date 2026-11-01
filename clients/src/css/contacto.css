@@ -1,5 +1,6 @@
 :root {
     --siena-tostado: #a0522d;
+    --siena-tostado-hover: #874322;
     --verde-salvia: #87a96b;
     --alabastro: #f5e6d3;
     --vara-de-oro: #d4a437;
@@ -248,7 +249,7 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--verde-salvia);
+  color: var(--siena-tostado-hover);
   margin-bottom: 8px;
 }
   
