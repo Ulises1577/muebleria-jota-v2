@@ -19,19 +19,37 @@ const normalizeUser = (user) => {
   };
 };
 
-const readJson = async (response, fallbackMessage) => {
+// fetch que distingue "no hay conexión" de "el servidor respondió con error"
+const safeFetch = async (url, options) => {
   try {
-    const payload = await response.json();
-    if (!response.ok) {
-      throw new Error(payload.message || fallbackMessage);
-    }
-    return payload;
-  } catch (error) {
-    if (error instanceof Error && error.message && error.message !== 'Unexpected end of JSON input') {
-      throw error;
-    }
+    return await fetch(url, options);
+  } catch {
+    const error = new Error('No se pudo conectar con el servidor. Verificá que el backend esté activo.');
+    error.isNetworkError = true;
+    throw error;
+  }
+};
+
+// Lee el JSON y, si la respuesta no es OK, lanza un Error que conserva el status HTTP
+const readJson = async (response, fallbackMessage) => {
+  let payload = null;
+  try {
+    payload = await response.json();
+  } catch {
+    payload = null;
+  }
+
+  if (!response.ok) {
+    const error = new Error(payload?.message || fallbackMessage);
+    error.status = response.status;
+    throw error;
+  }
+
+  if (!payload) {
     throw new Error(fallbackMessage);
   }
+
+  return payload;
 };
 
 export const authService = {
@@ -86,55 +104,23 @@ export const authService = {
   },
 
   async login({ email, password }) {
-    try {
-      const response = await fetch(`${AUTH_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+    const response = await safeFetch(`${AUTH_URL}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
 
-      const result = await readJson(response, 'No se pudo iniciar sesión.');
-      const normalized = normalizeUser(result.data.user);
-      this.persistSession(result.data.token, normalized);
-      return {
-        token: result.data.token,
-        user: normalized
-      };
-    } catch (error) {
-      // Si la API no está disponible o falla por conexión, soporte para testing / demo
-      const normalizedEmail = (email || '').trim().toLowerCase();
-      if (normalizedEmail === 'admin@hermanosjota.com') {
-        const fallbackAdmin = normalizeUser({
-          _id: 'admin-001',
-          nombre: 'Administrador Jota',
-          email: 'admin@hermanosjota.com',
-          rol: 'admin',
-          role: 'admin',
-          isAdmin: true
-        });
-        const fallbackToken = 'demo-admin-token';
-        this.persistSession(fallbackToken, fallbackAdmin);
-        return { user: fallbackAdmin, token: fallbackToken };
-      }
-      if (normalizedEmail === 'cliente@hermanosjota.com') {
-        const fallbackClient = normalizeUser({
-          _id: 'user-001',
-          nombre: 'Cliente Demo',
-          email: 'cliente@hermanosjota.com',
-          rol: 'usuario',
-          role: 'client',
-          isAdmin: false
-        });
-        const fallbackToken = 'demo-client-token';
-        this.persistSession(fallbackToken, fallbackClient);
-        return { user: fallbackClient, token: fallbackToken };
-      }
-      throw error;
-    }
+    const result = await readJson(response, 'No se pudo iniciar sesión.');
+    const normalized = normalizeUser(result.data.user);
+    this.persistSession(result.data.token, normalized);
+    return {
+      token: result.data.token,
+      user: normalized
+    };
   },
 
   async register({ nombre, email, password }) {
-    const response = await fetch(`${AUTH_URL}/register`, {
+    const response = await safeFetch(`${AUTH_URL}/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nombre, email, password })
@@ -155,24 +141,25 @@ export const authService = {
       throw new Error('No hay una sesión activa.');
     }
 
-    try {
-      const response = await fetch(`${AUTH_URL}/me`, {
-        headers: {
-          ...this.getAuthHeaders()
-        }
-      });
-
-      const result = await readJson(response, 'No se pudo verificar la sesión.');
-      const normalized = normalizeUser(result.data);
-      this.persistSession(token, normalized);
-      return normalized;
-    } catch (error) {
-      // Si el token es demo o la API no está disponible pero hay usuario local, mantener sesión
-      const localUser = this.getUser();
-      if (token.startsWith('demo-') && localUser) {
-        return localUser;
+    const response = await safeFetch(`${AUTH_URL}/me`, {
+      headers: {
+        ...this.getAuthHeaders()
       }
-      throw error;
-    }
+    });
+
+    const result = await readJson(response, 'No se pudo verificar la sesión.');
+    const normalized = normalizeUser(result.data);
+    this.persistSession(token, normalized);
+    return normalized;
   }
 };
+
+// Limpieza única: versiones anteriores guardaban tokens "demo-..." que el backend nunca
+// aceptó. Si quedaron en el navegador, se descartan para que no simulen una sesión admin.
+try {
+  if ((localStorage.getItem(TOKEN_KEY) || '').startsWith('demo-')) {
+    authService.logout();
+  }
+} catch {
+  /* localStorage no disponible: nada que limpiar */
+}
