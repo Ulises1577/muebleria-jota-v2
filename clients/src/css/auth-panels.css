@@ -540,3 +540,39 @@ header .header-actions .cart-button {
   color: var(--siena-tostado);
   font-weight: 700;
 }
+
+.admin-manage-btn {
+  white-space: nowrap;
+}
+
+.admin-loading {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.95rem;
+}
+
+.admin-table td:nth-child(6) {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.esquina,
+.panel-info__esquinas {
+  display: none !important;
+}
+
+.logout-btn {
+  background: var(--alabastro-calido);
+  color: var(--siena-tostado);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.logout-btn:hover {
+  background: #f0e4d6;
+}

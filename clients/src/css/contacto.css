@@ -329,45 +329,9 @@
     margin: 0;
   }
   
-  .esquina {
-    position: absolute;
-    width: 22px;
-    height: 22px;
-    border: 2px solid var(--vara-de-oro);
-  }
-  
-  .esquina--tl {
-    top: 12px;
-    left: 12px;
-    border-right: none;
-    border-bottom: none;
-  }
-  .esquina--tr {
-    top: 12px;
-    right: 12px;
-    border-left: none;
-    border-bottom: none;
-  }
-  
-  .esquina--bl {
-    bottom: 12px;
-    left: 12px;
-    border-right: none;
-    border-top: none;
-  }
-  
-  .esquina--br {
-    bottom: 12px;
-    right: 12px;
-    border-left: none;
-    border-top: none;
-  }
-  
-  .panel-form {
-    background: var(--superficie);
-    border-radius: var(--radio);
-    padding: 44px 36px;
-    box-shadow: 0 10px 24px rgba(51, 37, 28, 0.1);
+  .esquina,
+  .panel-info__esquinas {
+    display: none !important;
   }
   
   .campo {

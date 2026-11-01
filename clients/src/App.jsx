@@ -14,8 +14,6 @@ import { productService } from './services/productService';
 import { authService, SESSION_EXPIRED_EVENT } from './services/authService';
 import './App.css';
 
-const ORDERS_KEY_PREFIX = 'hermanos_jota_orders_';
-
 // Mapa vista <-> URL (sin librerías: History API)
 const pathForView = (view, productId) => {
   switch (view) {
@@ -29,13 +27,13 @@ const pathForView = (view, productId) => {
   }
 };
 
-const parsePath = (pathname) => {
+const parsePath = (pathname, allowAdmin = false) => {
   const path = pathname.replace(/\/+$/, '') || '/';
   if (path === '/productos') return { view: 'catalog', id: null };
   if (path.startsWith('/productos/')) return { view: 'detail', id: decodeURIComponent(path.split('/')[2]) };
   if (path === '/contacto') return { view: 'contact', id: null };
-  if (path === '/admin') return { view: 'admin', id: null };
-  if (path === '/admin/crear-producto') return { view: 'admin-create', id: null };
+  if (path === '/admin') return { view: allowAdmin ? 'admin' : 'home', id: null };
+  if (path === '/admin/crear-producto') return { view: allowAdmin ? 'admin-create' : 'home', id: null };
   if (path === '/perfil') return { view: 'profile', id: null };
   return { view: 'home', id: null };
 };
@@ -47,13 +45,34 @@ export function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [currentView, setCurrentView] = useState(() => parsePath(window.location.pathname).view);
-  const [selectedProductId, setSelectedProductId] = useState(() => parsePath(window.location.pathname).id);
-  const [contactPrefill, setContactPrefill] = useState(null);
+  // Sesión limpia al cargar a menos que haya token válido
+  const [user, setUser] = useState(() => {
+    try {
+      const storedToken = authService.getToken();
+      const storedUser = authService.getUser();
+      if (!storedToken || !storedUser) return null;
+      return storedUser;
+    } catch {
+      return null;
+    }
+  });
 
-  const [user, setUser] = useState(() => authService.getUser());
   const [token, setToken] = useState(() => authService.getToken());
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+  // Un usuario es admin ÚNICAMENTE si está autenticado con rol admin
+  const isUserAdmin = Boolean(user && (user.role === 'admin' || user.rol === 'admin' || user.isAdmin));
+
+  const [currentView, setCurrentView] = useState(() => {
+    const initialAdmin = Boolean(user && (user.role === 'admin' || user.rol === 'admin' || user.isAdmin));
+    return parsePath(window.location.pathname, initialAdmin).view;
+  });
+
+  const [selectedProductId, setSelectedProductId] = useState(() => {
+    return parsePath(window.location.pathname, false).id;
+  });
+
+  const [contactPrefill, setContactPrefill] = useState(null);
 
   const [cart, setCart] = useState(() => {
     try {
@@ -143,22 +162,22 @@ export function App() {
 
   useEffect(() => {
     const handlePopState = () => {
-      const { view, id } = parsePath(window.location.pathname);
+      const { view, id } = parsePath(window.location.pathname, isUserAdmin);
       setCurrentView(view);
       setSelectedProductId(id);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [isUserAdmin]);
 
   // Rutas protegidas: sin permisos se vuelve al inicio
   useEffect(() => {
-    if (isAdminView(currentView) && user?.rol !== 'admin') setCurrentView('home');
+    if (isAdminView(currentView) && !isUserAdmin) setCurrentView('home');
     if (currentView === 'profile' && !user) setCurrentView('home');
-  }, [currentView, user]);
+  }, [currentView, isUserAdmin, user]);
 
   const handleNavigate = (view, prefill = null) => {
-    if (isAdminView(view) && user?.rol !== 'admin') {
+    if (isAdminView(view) && !isUserAdmin) {
       if (!user) {
         setIsLoginOpen(true);
         return;
@@ -218,29 +237,7 @@ export function App() {
     setCart([]);
   };
 
-  const handleCheckout = (orderCart, total) => {
-    const userId = user?._id || user?.id;
-    if (userId) {
-      try {
-        const key = `${ORDERS_KEY_PREFIX}${userId}`;
-        const previous = JSON.parse(localStorage.getItem(key) || '[]');
-        const order = {
-          id: Date.now(),
-          date: new Date().toISOString(),
-          items: orderCart.map((item) => ({
-            id: item.id,
-            nombre: item.nombre,
-            quantity: item.quantity,
-            precio: item.precio
-          })),
-          total
-        };
-        localStorage.setItem(key, JSON.stringify([order, ...previous]));
-      } catch (storageError) {
-        console.error('No se pudo guardar el historial de pedidos:', storageError);
-      }
-    }
-
+  const handleCheckout = () => {
     setCart([]);
     setIsCartOpen(false);
     setToastMessage('Recibimos tu pedido. El taller te contactará para coordinar el despacho.');
@@ -255,7 +252,7 @@ export function App() {
 
   const handleProductCreated = async (created) => {
     await reloadProducts();
-    setToastMessage(`Se agregó ${created?.nombre || 'el mueble'} al catálogo.`);
+    setToastMessage(`Se agregó ${created?.nombre || 'el producto'} al catálogo.`);
     setTimeout(() => setToastMessage(null), 4000);
     setCurrentView('admin');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -265,7 +262,8 @@ export function App() {
     setUser(nextUser);
     setToken(nextToken);
     setIsLoginOpen(false);
-    setCurrentView(nextUser.rol === 'admin' ? 'admin' : 'profile');
+    const isNextAdmin = Boolean(nextUser && (nextUser.role === 'admin' || nextUser.rol === 'admin' || nextUser.isAdmin));
+    setCurrentView(isNextAdmin ? 'admin' : 'home');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -312,11 +310,11 @@ export function App() {
       case 'contact':
         return <ContactPage prefill={contactPrefill} />;
       case 'admin-create':
-        return user?.rol === 'admin'
+        return isUserAdmin
           ? <AdminCreateProductPage onCreated={handleProductCreated} onCancel={() => handleNavigate('admin')} />
           : null;
       case 'admin':
-        return user?.rol === 'admin'
+        return isUserAdmin
           ? <AdminPage products={products} onProductsChange={reloadProducts} onNavigate={handleNavigate} />
           : (
             <HomePage
@@ -331,9 +329,7 @@ export function App() {
           ? (
             <UserProfilePage
               user={user}
-              onUserUpdate={setUser}
               onLogout={handleLogout}
-              onNavigate={handleNavigate}
             />
           )
           : (
@@ -364,6 +360,7 @@ export function App() {
         onNavigate={handleNavigate}
         onOpenCart={() => setIsCartOpen(true)}
         user={user}
+        isAdmin={isUserAdmin}
         onOpenLogin={() => setIsLoginOpen(true)}
         onLogout={handleLogout}
       />
@@ -372,9 +369,11 @@ export function App() {
         {renderCurrentView()}
       </div>
 
-      <Footer onNavigate={handleNavigate}
-      user={user}
-      onOpenLogin={() => setIsLoginOpen(true)} />
+      <Footer
+        onNavigate={handleNavigate}
+        user={user}
+        onOpenLogin={() => setIsLoginOpen(true)}
+      />
 
       <CartModal
         isOpen={isCartOpen}
