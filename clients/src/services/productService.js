@@ -1,4 +1,4 @@
-import { authService } from './authService';
+import { authService, SESSION_EXPIRED_EVENT } from './authService';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/productos';
 
@@ -21,6 +21,11 @@ const parseResponse = async (response, fallbackMessage) => {
     payload = await response.json();
   } catch {
     payload = null;
+  }
+
+  if (response.status === 401 && authService.getToken()) {
+    // Token vencido o inválido en una acción protegida: avisamos a la app para cerrar sesión
+    window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
   }
 
   if (!response.ok) {
