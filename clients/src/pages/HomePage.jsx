@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import Sostenibilidad from '../components/Sostenibilidad';
 
-export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
+export const HomePage = ({ products = [], onSelectProduct, onNavigate, isAdmin = false }) => {
   // Destacados oficiales: IDs 1, 4, 7 y 8
   const destacadosIds = [1, 4, 7, 8];
   const destacados = products.filter(p => destacadosIds.includes(p.id));
@@ -47,13 +47,15 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
             >
               Explorar colección
             </button>
-            <button
-              type="button"
-              className="home-button home-button--ghost"
-              onClick={() => onNavigate('contact')}
-            >
-              Visitar el taller
-            </button>
+            {!isAdmin && (
+              <button
+                type="button"
+                className="home-button home-button--ghost"
+                onClick={() => onNavigate('contact')}
+              >
+                Visitar el taller
+              </button>
+            )}
           </div>
         </div>
 
@@ -167,9 +169,11 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
             <h2 id="cta-title">Las piezas se entienden en persona</h2>
             <p>Visitá la casa taller en Av. San Juan 2847, San Cristóbal, y tocá la madera antes de elegir.</p>
           </div>
-          <button type="button" className="home-button home-button--light" onClick={() => onNavigate('contact')}>
-            Visitar el taller
-          </button>
+          {!isAdmin && (
+            <button type="button" className="home-button home-button--light" onClick={() => onNavigate('contact')}>
+              Visitar el taller
+            </button>
+          )}
         </div>
       </section>
     </div>

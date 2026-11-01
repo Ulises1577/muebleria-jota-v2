@@ -100,19 +100,21 @@ export const Navbar = ({
                 Catálogo
               </a>
             </li>
-            <li>
-              <a
-                href="#contacto"
-                className={`nav-link ${currentView === 'contact' ? 'active' : ''}`}
-                data-nav-link="contacto"
-                onClick={(e) => handleLinkClick('contact', e)}
-              >
-                Contacto
-              </a>
-            </li>
+            {!isUserAdmin && (
+              <li>
+                <a
+                  href="#contacto"
+                  className={`nav-link ${currentView === 'contact' ? 'active' : ''}`}
+                  data-nav-link="contacto"
+                  onClick={(e) => handleLinkClick('contact', e)}
+                >
+                  Contacto
+                </a>
+              </li>
+            )}
           </ul>
         </nav>
-              
+
         <div className="header-actions">
           {user ? (
             <div className="user-menu" ref={userMenuRef}>
@@ -147,7 +149,7 @@ export const Navbar = ({
             </div>
           ) : (
             <button type="button" className="session-button" onClick={onOpenLogin}>
-              Ingresar
+              Iniciar Sesión
             </button>
           )}
 
@@ -174,16 +176,6 @@ export const Navbar = ({
               <span className={`cart-badge ${cartCount > 0 ? 'bump' : ''}`} data-cart-count aria-live="polite">
                 {cartCount}
               </span>
-            </button>
-          )}
-
-          {user && (
-            <button
-              type="button"
-              className="session-button logout-btn"
-              onClick={onLogout}
-            >
-              Cerrar Sesión
             </button>
           )}
         </div>
