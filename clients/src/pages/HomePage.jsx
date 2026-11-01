@@ -76,7 +76,7 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
       <section className="home-section home-container" aria-labelledby="featured-title" data-reveal>
         <div className="section-heading">
           <div>
-            <span className="section-eyebrow">Selección de la casa</span>
+            <span className="eyebrow">Selección de la casa</span>
             <h2 id="featured-title">Productos destacados</h2>
           </div>
           <a 
@@ -145,7 +145,7 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
       {/* Sección Historia Oficial */}
       <section className="history-section home-container" aria-labelledby="history-title" data-reveal>
         <div className="history-copy">
-          <span className="section-eyebrow">Nuestra historia</span>
+          <span className="eyebrow">Nuestra historia</span>
           <h2 id="history-title">Una tradición que sigue viva</h2>
           <p>
             En 1960, Juan José fundó en Buenos Aires una pequeña carpintería que llevaba su apellido y su pasión por el trabajo artesanal. Lo que comenzó como un modesto taller pronto se transformó en la reconocida mueblería Hermanos Jota.
