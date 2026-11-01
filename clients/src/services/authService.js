@@ -20,6 +20,8 @@ const readJson = async (response, fallbackMessage) => {
   }
 };
 
+export const SESSION_EXPIRED_EVENT = 'hermanos-jota:session-expired';
+
 const persistSession = (token, user) => {
   if (!token || !user) return;
   localStorage.setItem(TOKEN_KEY, token);
@@ -42,6 +44,10 @@ export const authService = {
     } catch {
       return null;
     }
+  },
+
+  getCurrentUser() {
+    return this.getUser();
   },
 
   isAuthenticated() {
