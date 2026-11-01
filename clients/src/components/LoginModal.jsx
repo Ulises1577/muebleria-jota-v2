@@ -6,7 +6,6 @@ const INITIAL_REGISTER = { nombre: '', email: '', password: '', confirmar: '' };
 
 export const LoginModal = ({ isOpen, onClose, onAuthSuccess }) => {
   const [activeTab, setActiveTab] = useState('login');
-  const [activeRole, setActiveRole] = useState(null);
   const [loginData, setLoginData] = useState(INITIAL_LOGIN);
   const [registerData, setRegisterData] = useState(INITIAL_REGISTER);
   const [errors, setErrors] = useState({});
@@ -51,27 +50,7 @@ export const LoginModal = ({ isOpen, onClose, onAuthSuccess }) => {
     setFormError('');
   };
 
-  // Opción B: Selector claro de rol / Acceso rápido
-  const handleQuickLogin = async (role) => {
-    setActiveRole(role);
-    setFormError('');
-    setIsSubmitting(true);
-
-    const email = role === 'admin' ? 'admin@hermanosjota.com' : 'cliente@hermanosjota.com';
-    const password = '123456';
-    setLoginData({ email, password });
-
-    try {
-      const session = await authService.login({ email, password });
-      onAuthSuccess(session);
-    } catch (error) {
-      setFormError(error.message || 'Error al iniciar sesión.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Opción A: Envío del formulario de credenciales a POST /api/auth/login
+  // Envío del formulario de credenciales
   const handleLoginSubmit = async (event) => {
     event.preventDefault();
     if (!loginData.email.trim() || !loginData.password) {
@@ -147,7 +126,7 @@ export const LoginModal = ({ isOpen, onClose, onAuthSuccess }) => {
 
         <h2 id="auth-modal-title">Iniciar Sesión</h2>
         <p className="auth-lead" style={{ marginBottom: '1.25rem' }}>
-          Elegí tu rol para ingresar al sistema o usá tus credenciales.
+          Ingresá con tus credenciales para acceder al sistema.
         </p>
 
         <div className="auth-tabs" role="tablist" style={{ marginBottom: '1.25rem' }}>
@@ -178,101 +157,38 @@ export const LoginModal = ({ isOpen, onClose, onAuthSuccess }) => {
         )}
 
         {activeTab === 'login' ? (
-          <div>
-            {/* Opción B: Selector claro / Botones de rol para acceso rápido */}
-            <div className="login-role-selector" style={{ marginBottom: '1.5rem' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '0.75rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                color: 'var(--color-text-secondary)',
-                marginBottom: '0.5rem',
-                fontWeight: 600
-              }}>
-                Seleccionar rol (Acceso rápido):
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
-                <button
-                  type="button"
-                  className="session-button"
-                  style={{
-                    background: activeRole === 'client' ? 'var(--siena-tostado)' : 'var(--alabastro-calido)',
-                    color: activeRole === 'client' ? '#fff' : 'var(--siena-tostado)',
-                    border: '1px solid var(--color-border)',
-                    padding: '0.75rem 0.5rem',
-                    fontSize: '0.74rem',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap'
-                  }}
-                  onClick={() => handleQuickLogin('client')}
-                  disabled={isSubmitting}
-                >
-                  Iniciar como Cliente
-                </button>
-                <button
-                  type="button"
-                  className="session-button"
-                  style={{
-                    background: activeRole === 'admin' ? 'var(--siena-tostado)' : 'var(--alabastro-calido)',
-                    color: activeRole === 'admin' ? '#fff' : 'var(--siena-tostado)',
-                    border: '1px solid var(--color-border)',
-                    padding: '0.75rem 0.5rem',
-                    fontSize: '0.74rem',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap'
-                  }}
-                  onClick={() => handleQuickLogin('admin')}
-                  disabled={isSubmitting}
-                >
-                  Iniciar como Administrador
-                </button>
-              </div>
+          <form className="auth-form" onSubmit={handleLoginSubmit} noValidate>
+            <div className="campo">
+              <label htmlFor="login-email">Email</label>
+              <input
+                id="login-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={loginData.email}
+                onChange={handleLoginChange}
+              />
             </div>
-
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              margin: '1.25rem 0',
-              color: 'var(--color-text-secondary)',
-              fontSize: '0.75rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em'
-            }}>
-              <span style={{ flex: 1, height: '1px', background: 'var(--color-border)' }}></span>
-              <span style={{ padding: '0 0.75rem' }}>o con tus credenciales</span>
-              <span style={{ flex: 1, height: '1px', background: 'var(--color-border)' }}></span>
+            <div className="campo">
+              <label htmlFor="login-password">Contraseña</label>
+              <input
+                id="login-password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                value={loginData.password}
+                onChange={handleLoginChange}
+              />
             </div>
-
-            {/* Opción A: Formulario de credenciales reales */}
-            <form className="auth-form" onSubmit={handleLoginSubmit} noValidate>
-              <div className="campo">
-                <label htmlFor="login-email">Email</label>
-                <input
-                  id="login-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  value={loginData.email}
-                  onChange={handleLoginChange}
-                />
-              </div>
-              <div className="campo">
-                <label htmlFor="login-password">Contraseña</label>
-                <input
-                  id="login-password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={loginData.password}
-                  onChange={handleLoginChange}
-                />
-              </div>
-              <button type="submit" className="boton-enviar auth-submit" disabled={isSubmitting} style={{ width: '100%', marginTop: '0.5rem' }}>
-                {isSubmitting ? 'Ingresando…' : 'Ingresar'}
-              </button>
-            </form>
-          </div>
+            <button
+              type="submit"
+              className="boton-enviar auth-submit"
+              disabled={isSubmitting}
+              style={{ width: '100%', marginTop: '0.5rem' }}
+            >
+              {isSubmitting ? 'Ingresando…' : 'Ingresar'}
+            </button>
+          </form>
         ) : (
           <form className="auth-form" onSubmit={handleRegisterSubmit} noValidate>
             <div className={`campo ${errors.nombre ? 'con-error' : ''}`}>
@@ -323,7 +239,12 @@ export const LoginModal = ({ isOpen, onClose, onAuthSuccess }) => {
               />
               <span className="mensaje-error">{errors.confirmar || ''}</span>
             </div>
-            <button type="submit" className="boton-enviar auth-submit" disabled={isSubmitting} style={{ width: '100%', marginTop: '0.5rem' }}>
+            <button
+              type="submit"
+              className="boton-enviar auth-submit"
+              disabled={isSubmitting}
+              style={{ width: '100%', marginTop: '0.5rem' }}
+            >
               {isSubmitting ? 'Creando cuenta…' : 'Crear cuenta'}
             </button>
           </form>
