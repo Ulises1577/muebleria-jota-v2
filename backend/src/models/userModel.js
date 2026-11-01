@@ -49,7 +49,6 @@ const userSchema = new mongoose.Schema(
 // Hashear la contraseña antes de guardar (solo si fue modificada)
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
-
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
@@ -215,7 +214,22 @@ export const UserModel = {
       const exists = await User.findOne({ email: seed.email });
       if (!exists) {
         await User.create(seed);
+        console.log(`Usuario semilla creado: ${seed.email}`);
+        continue;
+      }
+
+      // El usuario ya existía: se lee el documento "crudo" de la base (sin valores por defecto)
+      // y, si el rol está mal guardado (por ejemplo "role" o "isAdmin" de una versión anterior),
+      // se corrige a "rol" para que el login y el token salgan con el rol correcto.
+      const raw = await User.collection.findOne({ email: seed.email });
+      if (raw && raw.rol !== seed.rol) {
+        await User.collection.updateOne(
+          { email: seed.email },
+          { $set: { rol: seed.rol }, $unset: { role: '', isAdmin: '' } }
+        );
+        console.log(`Rol corregido en la base: ${seed.email} -> ${seed.rol}`);
       }
     }
   }
 };
+ 
