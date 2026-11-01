@@ -31,7 +31,8 @@ const parsePath = (pathname, allowAdmin = false) => {
   const path = pathname.replace(/\/+$/, '') || '/';
   if (path === '/productos') return { view: 'catalog', id: null };
   if (path.startsWith('/productos/')) return { view: 'detail', id: decodeURIComponent(path.split('/')[2]) };
-  if (path === '/contacto') return { view: 'contact', id: null };
+  // El administrador no tiene vista de contacto: si entra por URL va al inicio
+  if (path === '/contacto') return { view: allowAdmin ? 'home' : 'contact', id: null };
   if (path === '/admin') return { view: allowAdmin ? 'admin' : 'home', id: null };
   if (path === '/admin/crear-producto') return { view: allowAdmin ? 'admin-create' : 'home', id: null };
   if (path === '/perfil') return { view: 'profile', id: null };
@@ -178,9 +179,13 @@ export function App() {
   useEffect(() => {
     if (isAdminView(currentView) && !isUserAdmin) setCurrentView('home');
     if (currentView === 'profile' && !user) setCurrentView('home');
+    if (currentView === 'contact' && isUserAdmin) setCurrentView('home');
   }, [currentView, isUserAdmin, user]);
 
   const handleNavigate = (view, prefill = null) => {
+    // El administrador no accede a Contacto
+    if (view === 'contact' && isUserAdmin) return;
+
     if (isAdminView(view) && !isUserAdmin) {
       if (!user) {
         setIsLoginOpen(true);
@@ -290,6 +295,7 @@ export function App() {
             onSelectProduct={handleSelectProduct}
             onAddToCart={handleAddToCart}
             onNavigate={handleNavigate}
+            isAdmin={isUserAdmin}
           />
         );
       case 'catalog':
@@ -326,6 +332,7 @@ export function App() {
               onSelectProduct={handleSelectProduct}
               onAddToCart={handleAddToCart}
               onNavigate={handleNavigate}
+              isAdmin={isUserAdmin}
             />
           );
       case 'profile':
@@ -342,6 +349,7 @@ export function App() {
               onSelectProduct={handleSelectProduct}
               onAddToCart={handleAddToCart}
               onNavigate={handleNavigate}
+              isAdmin={isUserAdmin}
             />
           );
       default:
@@ -351,6 +359,7 @@ export function App() {
             onSelectProduct={handleSelectProduct}
             onAddToCart={handleAddToCart}
             onNavigate={handleNavigate}
+            isAdmin={isUserAdmin}
           />
         );
     }

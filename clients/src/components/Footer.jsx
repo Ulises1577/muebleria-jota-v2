@@ -1,6 +1,8 @@
 import React from 'react';
 
 export const Footer = ({ onNavigate, user, onOpenLogin }) => {
+  const isAdmin = Boolean(user && (user.role === 'admin' || user.rol === 'admin' || user.isAdmin));
+
   return (
     <footer className="site-footer" role="contentinfo">
       <div className="container footer-grid">
@@ -24,11 +26,13 @@ export const Footer = ({ onNavigate, user, onOpenLogin }) => {
                 Catálogo
               </a>
             </li>
-            <li>
-              <a href="#contacto" onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('contact'); }}>
-                Contacto
-              </a>
-            </li>
+            {!isAdmin && (
+              <li>
+                <a href="#contacto" onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('contact'); }}>
+                  Contacto
+                </a>
+              </li>
+            )}
             <li>
               {user ? (
                 <a href="#perfil" onClick={(e) => {e.preventDefault(); onNavigate && onNavigate('profile'); }}>
