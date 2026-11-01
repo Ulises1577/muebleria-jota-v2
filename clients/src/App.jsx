@@ -372,7 +372,9 @@ export function App() {
         {renderCurrentView()}
       </div>
 
-      <Footer onNavigate={handleNavigate} />
+      <Footer onNavigate={handleNavigate}
+      user={user}
+      onOpenLogin={() => setIsLoginOpen(true)} />
 
       <CartModal
         isOpen={isCartOpen}

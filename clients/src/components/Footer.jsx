@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const Footer = ({ onNavigate }) => {
+export const Footer = ({ onNavigate, user, onOpenLogin }) => {
   return (
     <footer className="site-footer" role="contentinfo">
       <div className="container footer-grid">
@@ -28,6 +28,17 @@ export const Footer = ({ onNavigate }) => {
               <a href="#contacto" onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('contact'); }}>
                 Contacto
               </a>
+            </li>
+            <li>
+              {user ? (
+                <a href="#perfil" onClick={(e) => {e.preventDefault(); onNavigate && onNavigate('profile'); }}>
+                  Mi Cuenta
+                </a>
+              ) : (
+                <a href="#login" onClick={(e) => { e.preventDefault(); onOpenLogin && onOpenLogin(); }}>
+                  Ingresar
+                </a>
+              )}
             </li>
           </ul>
         </div>
