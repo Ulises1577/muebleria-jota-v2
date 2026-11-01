@@ -128,8 +128,12 @@ export function App() {
         setUser(currentUser);
         setToken(storedToken);
       })
-      .catch(() => {
+      .catch((err) => {
         if (!isMounted) return;
+        // Solo se cierra la sesión si el servidor dijo que el token no sirve.
+        // Un corte de red o un 500 no deben borrar el token del administrador.
+        const tokenRejected = err?.status === 401 || err?.status === 403 || err?.status === 404;
+        if (!tokenRejected) return;
         authService.logout();
         setUser(null);
         setToken(null);
