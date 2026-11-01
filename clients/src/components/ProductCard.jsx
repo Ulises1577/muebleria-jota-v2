@@ -11,10 +11,10 @@ export const ProductCard = ({ product, onSelectProduct }) => {
     <article className="tarjeta-producto">
       <div
         className="producto-media"
-        onClick={() => onSelectProduct(product.id)}
+        onClick={() => onSelectProduct(product._id)}
       >
         <img
-          src={product.imagen}
+          src={product.imagenUrl}
           alt={product.nombre}
           className="producto-imagen"
           loading="lazy"
@@ -24,7 +24,7 @@ export const ProductCard = ({ product, onSelectProduct }) => {
         {product.categoria && (
           <span className="producto-categoria">{product.categoria}</span>
         )}
-        <h3 onClick={() => onSelectProduct(product.id)}>
+        <h3 onClick={() => onSelectProduct(product._id)}>
           {product.nombre}
         </h3>
         <p className="producto-descripcion">{product.descripcion}</p>
@@ -32,7 +32,7 @@ export const ProductCard = ({ product, onSelectProduct }) => {
         <button
           type="button"
           className="producto-cta"
-          onClick={() => onSelectProduct(product.id)}
+          onClick={() => onSelectProduct(product._id)}
           aria-label={`Ver detalle de ${product.nombre}`}
         >
           Ver detalle

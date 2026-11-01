@@ -134,9 +134,9 @@ export const ProductDetail = ({ productId, onBack, onAddToCart, onSelectRelated 
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 </svg>
                 Madera FSC® • Sostenible
-              </div>
+              </div> 
               <div className="product-main-image-container">
-                <img id="product-image" className="product-main-img" src={product.imagen} alt={product.nombre} />
+                <img id="product-image" className="product-main-img" src={product.imagenUrl} alt={product.nombre} />
               </div>
             </div>
 
@@ -216,7 +216,7 @@ export const ProductDetail = ({ productId, onBack, onAddToCart, onSelectRelated 
                     <p className="trust-text-sub">Embalaje reforzado sin plásticos</p>
                   </div>
                 </div>
-
+ 
                 <div className="trust-item">
                   <svg className="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
@@ -246,7 +246,7 @@ export const ProductDetail = ({ productId, onBack, onAddToCart, onSelectRelated 
                       <td>{valor}</td>
                     </tr>
                   ))}
-                </tbody>
+                </tbody> 
               </table>
             </div>
           </section>

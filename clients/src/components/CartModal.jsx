@@ -48,8 +48,8 @@ export const CartModal = ({ isOpen, onClose, cart = [], onUpdateQuantity, onRemo
               });
 
               return (
-                <div key={item.id} className="cart-modal-item">
-                  <img src={item.imagen} alt={item.nombre} className="cart-modal-item-img" />
+                <div key={item._id} className="cart-modal-item">
+                  <img src={item.imagenUrl} alt={item.nombre} className="cart-modal-item-img" />
                   <div style={{ flex: 1 }}>
                     <h4 style={{ margin: '0 0 0.25rem', fontSize: '0.95rem' }}>{item.nombre}</h4>
                     <span style={{ color: 'var(--siena-tostado)', fontWeight: 700, fontSize: '0.9rem' }}>
@@ -58,7 +58,7 @@ export const CartModal = ({ isOpen, onClose, cart = [], onUpdateQuantity, onRemo
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.4rem' }}>
                       <button 
                         type="button"
-                        onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => onUpdateQuantity(item._id, item.quantity - 1)}
                         style={{ width: '24px', height: '24px', border: '1px solid #ccc', background: '#fff', borderRadius: '4px' }}
                       >
                         -
@@ -66,14 +66,14 @@ export const CartModal = ({ isOpen, onClose, cart = [], onUpdateQuantity, onRemo
                       <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{item.quantity}</span>
                       <button 
                         type="button"
-                        onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => onUpdateQuantity(item._id, item.quantity + 1)}
                         style={{ width: '24px', height: '24px', border: '1px solid #ccc', background: '#fff', borderRadius: '4px' }}
                       >
                         +
                       </button>
                       <button 
                         type="button"
-                        onClick={() => onRemoveItem(item.id)}
+                        onClick={() => onRemoveItem(item._id)}
                         style={{ background: 'none', border: 'none', color: '#b91c1c', fontSize: '0.75rem', marginLeft: 'auto', cursor: 'pointer', textDecoration: 'underline' }}
                       >
                         Quitar

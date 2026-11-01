@@ -97,18 +97,18 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
             }).format(producto.precio);
 
             return (
-              <article key={producto.id} className="featured-card">
+              <article key={producto._id} className="featured-card">
                 <div 
                   className="featured-image-wrap" 
-                  onClick={() => onSelectProduct(producto.id)}
+                  onClick={() => onSelectProduct(producto._id)}
                   style={{ cursor: 'pointer' }}
                 >
-                  <img src={producto.imagen} alt={producto.nombre} />
+                  <img src={producto.imagenUrl} alt={producto.nombre} />
                 </div>
                 <div className="featured-card-body">
                   <span className="featured-category">{producto.categoria || 'Colección'}</span>
                   <h3 
-                    onClick={() => onSelectProduct(producto.id)}
+                    onClick={() => onSelectProduct(producto._id)}
                     style={{ cursor: 'pointer' }}
                   >
                     {producto.nombre}
@@ -118,7 +118,7 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
                   <button 
                     type="button"
                     className="btn-detalle"
-                    onClick={() => onSelectProduct(producto.id)}
+                    onClick={() => onSelectProduct(producto._id)}
                     style={{
                       background: 'none',
                       border: 'none',
