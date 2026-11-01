@@ -112,7 +112,7 @@ export const Navbar = ({
             </li>
           </ul>
         </nav>
-
+              
         <div className="header-actions">
           {user ? (
             <div className="user-menu" ref={userMenuRef}>
@@ -147,7 +147,7 @@ export const Navbar = ({
             </div>
           ) : (
             <button type="button" className="session-button" onClick={onOpenLogin}>
-              Iniciar Sesión
+              Ingresar
             </button>
           )}
 
