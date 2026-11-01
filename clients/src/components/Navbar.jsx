@@ -124,9 +124,14 @@ export const Navbar = ({
                     Mi Perfil
                   </button>
                   {user.rol === 'admin' && (
-                    <button type="button" onClick={(e) => handleLinkClick('admin', e)}>
-                      Panel Admin
-                    </button>
+                    <>
+                      <button type="button" onClick={(e) => handleLinkClick('admin', e)}>
+                        Panel Admin
+                      </button>
+                      <button type="button" onClick={(e) => handleLinkClick('admin-create', e)}>
+                        Nuevo mueble
+                      </button>
+                    </>
                   )}
                   <button
                     type="button"

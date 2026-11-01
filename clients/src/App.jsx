@@ -8,20 +8,47 @@ import { CatalogPage } from './pages/CatalogPage';
 import { DetailPage } from './pages/DetailPage';
 import { ContactPage } from './pages/ContactPage';
 import { AdminPage } from './pages/AdminPage';
+import { AdminCreateProductPage } from './pages/AdminCreateProductPage';
 import { UserProfilePage } from './pages/UserProfilePage';
 import { productService } from './services/productService';
-import { authService } from './services/authService';
+import { authService, SESSION_EXPIRED_EVENT } from './services/authService';
 import './App.css';
 
 const ORDERS_KEY_PREFIX = 'hermanos_jota_orders_';
+
+// Mapa vista <-> URL (sin librerías: History API)
+const pathForView = (view, productId) => {
+  switch (view) {
+    case 'catalog': return '/productos';
+    case 'detail': return productId ? `/productos/${productId}` : '/productos';
+    case 'contact': return '/contacto';
+    case 'admin': return '/admin';
+    case 'admin-create': return '/admin/crear-producto';
+    case 'profile': return '/perfil';
+    default: return '/';
+  }
+};
+
+const parsePath = (pathname) => {
+  const path = pathname.replace(/\/+$/, '') || '/';
+  if (path === '/productos') return { view: 'catalog', id: null };
+  if (path.startsWith('/productos/')) return { view: 'detail', id: decodeURIComponent(path.split('/')[2]) };
+  if (path === '/contacto') return { view: 'contact', id: null };
+  if (path === '/admin') return { view: 'admin', id: null };
+  if (path === '/admin/crear-producto') return { view: 'admin-create', id: null };
+  if (path === '/perfil') return { view: 'profile', id: null };
+  return { view: 'home', id: null };
+};
+
+const isAdminView = (view) => view === 'admin' || view === 'admin-create';
 
 export function App() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [currentView, setCurrentView] = useState('home');
-  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [currentView, setCurrentView] = useState(() => parsePath(window.location.pathname).view);
+  const [selectedProductId, setSelectedProductId] = useState(() => parsePath(window.location.pathname).id);
   const [contactPrefill, setContactPrefill] = useState(null);
 
   const [user, setUser] = useState(() => authService.getUser());
@@ -94,8 +121,44 @@ export function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleExpired = () => {
+      authService.logout();
+      setUser(null);
+      setToken(null);
+      setCurrentView('home');
+      setIsLoginOpen(true);
+    };
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleExpired);
+  }, []);
+
+  // Sincroniza la URL con la vista actual y atiende los botones atrás/adelante
+  useEffect(() => {
+    const target = pathForView(currentView, selectedProductId);
+    if (window.location.pathname !== target) {
+      window.history.pushState(null, '', target);
+    }
+  }, [currentView, selectedProductId]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const { view, id } = parsePath(window.location.pathname);
+      setCurrentView(view);
+      setSelectedProductId(id);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Rutas protegidas: sin permisos se vuelve al inicio
+  useEffect(() => {
+    if (isAdminView(currentView) && user?.rol !== 'admin') setCurrentView('home');
+    if (currentView === 'profile' && !user) setCurrentView('home');
+  }, [currentView, user]);
+
   const handleNavigate = (view, prefill = null) => {
-    if (view === 'admin' && user?.rol !== 'admin') {
+    if (isAdminView(view) && user?.rol !== 'admin') {
       if (!user) {
         setIsLoginOpen(true);
         return;
@@ -190,6 +253,14 @@ export function App() {
     return data;
   };
 
+  const handleProductCreated = async (created) => {
+    await reloadProducts();
+    setToastMessage(`Se agregó ${created?.nombre || 'el mueble'} al catálogo.`);
+    setTimeout(() => setToastMessage(null), 4000);
+    setCurrentView('admin');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleAuthSuccess = ({ user: nextUser, token: nextToken }) => {
     setUser(nextUser);
     setToken(nextToken);
@@ -240,9 +311,13 @@ export function App() {
         );
       case 'contact':
         return <ContactPage prefill={contactPrefill} />;
+      case 'admin-create':
+        return user?.rol === 'admin'
+          ? <AdminCreateProductPage onCreated={handleProductCreated} onCancel={() => handleNavigate('admin')} />
+          : null;
       case 'admin':
         return user?.rol === 'admin'
-          ? <AdminPage products={products} onProductsChange={reloadProducts} />
+          ? <AdminPage products={products} onProductsChange={reloadProducts} onNavigate={handleNavigate} />
           : (
             <HomePage
               products={products}
