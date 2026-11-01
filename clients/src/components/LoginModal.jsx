@@ -15,12 +15,18 @@ export const LoginModal = ({ isOpen, onClose, onAuthSuccess }) => {
   useEffect(() => {
     if (!isOpen) return undefined;
 
+    document.body.classList.add('modal-open');
+
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') onClose();
     };
 
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.classList.remove('modal-open');
+    };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
