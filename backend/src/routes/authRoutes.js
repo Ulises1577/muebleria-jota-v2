@@ -4,6 +4,19 @@ import { verifyToken } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
+router.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Endpoints de autenticación disponibles',
+    endpoints: {
+      register: '/api/auth/register',
+      login: '/api/auth/login',
+      me: '/api/auth/me',
+      updateMe: '/api/auth/me'
+    }
+  });
+});
+
 /**
  * @swagger
  * components:
