@@ -13,7 +13,13 @@ export const LoginModal = ({ isOpen, onClose, onAuthSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) return undefined;
+    if (!isOpen) {
+      setLoginData(INITIAL_LOGIN);
+      setRegisterData(INITIAL_REGISTER);
+      setErrors({});
+      setFormError('');
+      return undefined;
+    }
 
     document.body.classList.add('modal-open');
 
@@ -50,7 +56,6 @@ export const LoginModal = ({ isOpen, onClose, onAuthSuccess }) => {
     setFormError('');
   };
 
-  // Envío del formulario de credenciales
   const handleLoginSubmit = async (event) => {
     event.preventDefault();
     if (!loginData.email.trim() || !loginData.password) {
@@ -125,9 +130,31 @@ export const LoginModal = ({ isOpen, onClose, onAuthSuccess }) => {
         </button>
 
         <h2 id="auth-modal-title">Iniciar Sesión</h2>
-        <p className="auth-lead" style={{ marginBottom: '1.25rem' }}>
+        <p className="auth-lead" style={{ marginBottom: '1rem' }}>
           Ingresá con tus credenciales para acceder al sistema.
         </p>
+
+        {/* Cuentas de Testeo escritas de forma fija */}
+        <div 
+          className="test-credentials-info"
+          style={{
+            backgroundColor: 'var(--bg-card, #faf6f0)',
+            borderLeft: '3px solid var(--siena-tostado, #8b5a2b)',
+            padding: '0.65rem 0.85rem',
+            marginBottom: '1.25rem',
+            fontSize: '0.82rem',
+            color: '#555',
+            borderRadius: '0 4px 4px 0'
+          }}
+        >
+          <strong style={{ display: 'block', marginBottom: '0.3rem', color: '#333' }}>
+             
+          </strong>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontFamily: 'monospace' }}>
+            <span><strong>Admin:</strong> admin@hermanosjota.com / 123456</span>
+            <span><strong>Cliente:</strong> cliente@hermanosjota.com / 123456</span>
+          </div>
+        </div>
 
         <div className="auth-tabs" role="tablist" style={{ marginBottom: '1.25rem' }}>
           <button
