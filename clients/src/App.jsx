@@ -272,7 +272,7 @@ export function App() {
     setToken(nextToken);
     setIsLoginOpen(false);
     const isNextAdmin = Boolean(nextUser && (nextUser.role === 'admin' || nextUser.rol === 'admin' || nextUser.isAdmin));
-    setCurrentView(isNextAdmin ? 'admin' : 'home');
+    setCurrentView('home');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
