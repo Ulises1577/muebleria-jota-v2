@@ -73,6 +73,8 @@ export function App() {
     return parsePath(window.location.pathname, false).id;
   });
 
+  const [editProductId, setEditProductId] = useState(null);
+
   const [contactPrefill, setContactPrefill] = useState(null);
 
   const [cart, setCart] = useState(() => {
@@ -182,7 +184,7 @@ export function App() {
     if (currentView === 'contact' && isUserAdmin) setCurrentView('home');
   }, [currentView, isUserAdmin, user]);
 
-  const handleNavigate = (view, prefill = null) => {
+  const handleNavigate = (view, prefillOrPayload = null) => {
     // El administrador no accede a Contacto
     if (view === 'contact' && isUserAdmin) return;
 
@@ -201,7 +203,15 @@ export function App() {
       return;
     }
 
-    setContactPrefill(view === 'contact' ? prefill : null);
+    // Guardamos o limpiamos el id del producto a editar
+    if (view === 'admin' && prefillOrPayload?.editProductId) {
+      setEditProductId(prefillOrPayload.editProductId);
+    } else if (view === 'admin') {
+      setEditProductId(null);
+    }
+
+    // FIX: Usar prefillOrPayload en lugar de prefill que no existía
+    setContactPrefill(view === 'contact' ? prefillOrPayload : null);
     setCurrentView(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -214,10 +224,10 @@ export function App() {
 
   const handleAddToCart = (product, quantity = 1) => {
     setCart((prevCart) => {
-      const existing = prevCart.find((item) => item.id === product.id);
+      const existing = prevCart.find((item) => (item._id || item.id) === (product._id || product.id));
       if (existing) {
         return prevCart.map((item) =>
-          item.id === product.id
+          (item._id || item.id) === (product._id || product.id)
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
@@ -233,13 +243,13 @@ export function App() {
     }
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item.id === productId ? { ...item, quantity: newQuantity } : item
+        (item._id || item.id) === productId ? { ...item, quantity: newQuantity } : item
       )
     );
   };
 
   const handleRemoveFromCart = (productId) => {
-    setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
+    setCart((prevCart) => prevCart.filter((item) => (item._id || item.id) !== productId));
   };
 
   const handleClearCart = () => {
@@ -271,7 +281,6 @@ export function App() {
     setUser(nextUser);
     setToken(nextToken);
     setIsLoginOpen(false);
-    const isNextAdmin = Boolean(nextUser && (nextUser.role === 'admin' || nextUser.rol === 'admin' || nextUser.isAdmin));
     setCurrentView('home');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -314,6 +323,8 @@ export function App() {
             productId={selectedProductId}
             onBack={() => handleNavigate('catalog')}
             onAddToCart={handleAddToCart}
+            isAdmin={isUserAdmin}
+            onNavigate={handleNavigate}
             onSelectRelated={handleSelectProduct}
           />
         );
@@ -325,7 +336,14 @@ export function App() {
           : null;
       case 'admin':
         return isUserAdmin
-          ? <AdminPage products={products} onProductsChange={reloadProducts} onNavigate={handleNavigate} />
+          ? ( 
+          <AdminPage 
+            products={products} 
+            onProductsChange={reloadProducts} 
+            onNavigate={handleNavigate}
+            editProductId={editProductId} 
+          />
+          )
           : (
             <HomePage
               products={products}

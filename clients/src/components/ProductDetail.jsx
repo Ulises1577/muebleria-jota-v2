@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { productService } from '../services/productService';
 
-export const ProductDetail = ({ productId, onBack, onAddToCart, onSelectRelated }) => {
+export const ProductDetail = ({ productId, onBack, onAddToCart, onSelectRelated, isAdmin, onNavigate }) => {
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -140,7 +140,7 @@ export const ProductDetail = ({ productId, onBack, onAddToCart, onSelectRelated 
               </div>
             </div>
 
-            {/* Panel de Información y Compra */}
+            {/* Panel de Información y Acción */}
             <article className="product-info-panel">
               <div>
                 <span className="product-category-tag">{product.categoria || 'Colección'}</span>
@@ -154,53 +154,70 @@ export const ProductDetail = ({ productId, onBack, onAddToCart, onSelectRelated 
 
               <p className="product-description">{product.descripcion}</p>
 
-              {/* Controles de Compra */}
-              <div className="purchase-controls">
-                <div className="quantity-control-group">
-                  <label htmlFor="qty-input" className="quantity-label">Cantidad:</label>
-                  <div className="quantity-stepper">
-                    <button 
-                      type="button" 
-                      className="quantity-btn" 
-                      onClick={handleDecrease}
-                      disabled={quantity <= 1}
-                      aria-label="Reducir cantidad"
-                    >
-                      −
-                    </button>
-                    <input 
-                      type="number" 
-                      id="qty-input" 
-                      className="quantity-input" 
-                      value={quantity} 
-                      readOnly 
-                      aria-label="Cantidad a comprar" 
-                    />
-                    <button 
-                      type="button" 
-                      className="quantity-btn" 
-                      onClick={handleIncrease}
-                      disabled={quantity >= 10}
-                      aria-label="Aumentar cantidad"
-                    >
-                      +
-                    </button>
-                  </div>
+              {/* Controles de Compra (Cliente) o Edición (Admin) */}
+              {isAdmin ? (
+                <div className="admin-product-actions">
+                  <button 
+                    type="button" 
+                    className="add-to-cart-btn" 
+                    style={{ width: '100%', justifyContent: 'center' }}
+                    onClick={() => onNavigate && onNavigate('admin', { editProductId: product.id || product._id })}
+                  >
+                    <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Editar Producto
+                  </button>
                 </div>
+              ) : (
+                <div className="purchase-controls">
+                  <div className="quantity-control-group">
+                    <label htmlFor="qty-input" className="quantity-label">Cantidad:</label>
+                    <div className="quantity-stepper">
+                      <button 
+                        type="button" 
+                        className="quantity-btn" 
+                        onClick={handleDecrease}
+                        disabled={quantity <= 1}
+                        aria-label="Reducir cantidad"
+                      >
+                        −
+                      </button>
+                      <input 
+                        type="number" 
+                        id="qty-input" 
+                        className="quantity-input" 
+                        value={quantity} 
+                        readOnly 
+                        aria-label="Cantidad a comprar" 
+                      />
+                      <button 
+                        type="button" 
+                        className="quantity-btn" 
+                        onClick={handleIncrease}
+                        disabled={quantity >= 10}
+                        aria-label="Aumentar cantidad"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
 
-                <button 
-                  type="button" 
-                  className="add-to-cart-btn" 
-                  onClick={handleAddToCartClick}
-                >
-                  <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                  </svg>
-                  Añadir al Carrito
-                </button>
-              </div>
+                  <button 
+                    type="button" 
+                    className="add-to-cart-btn" 
+                    onClick={handleAddToCartClick}
+                  >
+                    <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                      <line x1="3" y1="6" x2="21" y2="6"></line>
+                      <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    Añadir al Carrito
+                  </button>
+                </div>
+              )}
 
               {/* Badges de Confianza */}
               <div className="trust-badges-grid">

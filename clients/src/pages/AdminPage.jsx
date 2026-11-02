@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ProductFormModal } from '../components/ProductFormModal';
 import { productService } from '../services/productService';
 
-export const AdminPage = ({ onProductsChange }) => {
+export const AdminPage = ({ onProductsChange, editProductId }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,6 +28,17 @@ export const AdminPage = ({ onProductsChange }) => {
   useEffect(() => {
     loadProducts();
   }, []);
+
+  // Abre el modal de edición automáticamente si se recibe un ID específico
+  useEffect(() => {
+    if (editProductId && products.length > 0) {
+      const target = products.find((p) => (p._id || p.id) === editProductId);
+      if (target) {
+        setEditingProduct(target);
+        setFormOpen(true);
+      }
+    }
+  }, [editProductId, products]);
 
   const openCreate = () => {
     setEditingProduct(null);
