@@ -5,6 +5,7 @@ import cors from 'cors';
 import { requestLogger } from './middleware/logger.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 import productRoutes from './routes/productRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 import { config } from './config/env.js';
 
 const app = express();
@@ -22,7 +23,7 @@ const corsOptions = {
 
     callback(new Error('Origen no permitido por CORS'));
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 };
@@ -91,6 +92,7 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+app.use('/api/auth', authRoutes);
 app.use('/api/productos', productRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);

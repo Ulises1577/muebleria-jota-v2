@@ -2,24 +2,81 @@ import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { CartModal } from './components/CartModal';
+import { LoginModal } from './components/LoginModal';
 import { HomePage } from './pages/HomePage';
 import { CatalogPage } from './pages/CatalogPage';
 import { DetailPage } from './pages/DetailPage';
 import { ContactPage } from './pages/ContactPage';
+import { AdminPage } from './pages/AdminPage';
+import { AdminCreateProductPage } from './pages/AdminCreateProductPage';
+import { UserProfilePage } from './pages/UserProfilePage';
 import { productService } from './services/productService';
+import { authService, SESSION_EXPIRED_EVENT } from './services/authService';
 import './App.css';
 
+// Mapa vista <-> URL (sin librerías: History API)
+const pathForView = (view, productId) => {
+  switch (view) {
+    case 'catalog': return '/productos';
+    case 'detail': return productId ? `/productos/${productId}` : '/productos';
+    case 'contact': return '/contacto';
+    case 'admin': return '/admin';
+    case 'admin-create': return '/admin/crear-producto';
+    case 'profile': return '/perfil';
+    default: return '/';
+  }
+};
+
+const parsePath = (pathname, allowAdmin = false) => {
+  const path = pathname.replace(/\/+$/, '') || '/';
+  if (path === '/productos') return { view: 'catalog', id: null };
+  if (path.startsWith('/productos/')) return { view: 'detail', id: decodeURIComponent(path.split('/')[2]) };
+  // El administrador no tiene vista de contacto: si entra por URL va al inicio
+  if (path === '/contacto') return { view: allowAdmin ? 'home' : 'contact', id: null };
+  if (path === '/admin') return { view: allowAdmin ? 'admin' : 'home', id: null };
+  if (path === '/admin/crear-producto') return { view: allowAdmin ? 'admin-create' : 'home', id: null };
+  if (path === '/perfil') return { view: 'profile', id: null };
+  return { view: 'home', id: null };
+};
+
+const isAdminView = (view) => view === 'admin' || view === 'admin-create';
+
 export function App() {
-  // 1. Estado de productos y ciclo de vida de la petición a la API (Sprint 3 y 4)
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 2. Estado de navegación y renderizado condicional de vistas
-  const [currentView, setCurrentView] = useState('home'); // 'home' | 'catalog' | 'detail' | 'contact'
-  const [selectedProductId, setSelectedProductId] = useState(null);
+  // Sesión limpia al cargar a menos que haya token válido
+  const [user, setUser] = useState(() => {
+    try {
+      const storedToken = authService.getToken();
+      const storedUser = authService.getUser();
+      if (!storedToken || !storedUser) return null;
+      return storedUser;
+    } catch {
+      return null;
+    }
+  });
 
-  // 3. Estado del carrito de compras (elevado en App.jsx con persistencia en localStorage)
+  const [token, setToken] = useState(() => authService.getToken());
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+  // Un usuario es admin ÚNICAMENTE si está autenticado con rol admin
+  const isUserAdmin = Boolean(user && (user.role === 'admin' || user.rol === 'admin' || user.isAdmin));
+
+  const [currentView, setCurrentView] = useState(() => {
+    const initialAdmin = Boolean(user && (user.role === 'admin' || user.rol === 'admin' || user.isAdmin));
+    return parsePath(window.location.pathname, initialAdmin).view;
+  });
+
+  const [selectedProductId, setSelectedProductId] = useState(() => {
+    return parsePath(window.location.pathname, false).id;
+  });
+
+  const [editProductId, setEditProductId] = useState(null);
+
+  const [contactPrefill, setContactPrefill] = useState(null);
+
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem('hermanos_jota_cart');
@@ -29,8 +86,8 @@ export function App() {
     }
   });
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
 
-  // Sincronización del carrito con localStorage
   useEffect(() => {
     try {
       localStorage.setItem('hermanos_jota_cart', JSON.stringify(cart));
@@ -39,7 +96,6 @@ export function App() {
     }
   }, [cart]);
 
-  // Carga inicial del catálogo consumiendo la API de Express
   useEffect(() => {
     let isMounted = true;
     setIsLoading(true);
@@ -64,26 +120,114 @@ export function App() {
     };
   }, []);
 
-  // Navegación entre vistas
-  const handleNavigate = (view) => {
+  useEffect(() => {
+    let isMounted = true;
+    const storedToken = authService.getToken();
+    if (!storedToken) return undefined;
+
+    authService.me()
+      .then((currentUser) => {
+        if (!isMounted) return;
+        setUser(currentUser);
+        setToken(storedToken);
+      })
+      .catch((err) => {
+        if (!isMounted) return;
+        // Solo se cierra la sesión si el servidor dijo que el token no sirve.
+        // Un corte de red o un 500 no deben borrar el token del administrador.
+        const tokenRejected = err?.status === 401 || err?.status === 403 || err?.status === 404;
+        if (!tokenRejected) return;
+        authService.logout();
+        setUser(null);
+        setToken(null);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleExpired = () => {
+      authService.logout();
+      setUser(null);
+      setToken(null);
+      setCurrentView('home');
+      setIsLoginOpen(true);
+    };
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleExpired);
+  }, []);
+
+  // Sincroniza la URL con la vista actual y atiende los botones atrás/adelante
+  useEffect(() => {
+    const target = pathForView(currentView, selectedProductId);
+    if (window.location.pathname !== target) {
+      window.history.pushState(null, '', target);
+    }
+  }, [currentView, selectedProductId]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const { view, id } = parsePath(window.location.pathname, isUserAdmin);
+      setCurrentView(view);
+      setSelectedProductId(id);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isUserAdmin]);
+
+  // Rutas protegidas: sin permisos se vuelve al inicio
+  useEffect(() => {
+    if (isAdminView(currentView) && !isUserAdmin) setCurrentView('home');
+    if (currentView === 'profile' && !user) setCurrentView('home');
+    if (currentView === 'contact' && isUserAdmin) setCurrentView('home');
+  }, [currentView, isUserAdmin, user]);
+
+  const handleNavigate = (view, prefillOrPayload = null) => {
+    // El administrador no accede a Contacto
+    if (view === 'contact' && isUserAdmin) return;
+
+    if (isAdminView(view) && !isUserAdmin) {
+      if (!user) {
+        setIsLoginOpen(true);
+        return;
+      }
+      setCurrentView('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (view === 'profile' && !user) {
+      setIsLoginOpen(true);
+      return;
+    }
+
+    // Guardamos o limpiamos el id del producto a editar
+    if (view === 'admin' && prefillOrPayload?.editProductId) {
+      setEditProductId(prefillOrPayload.editProductId);
+    } else if (view === 'admin') {
+      setEditProductId(null);
+    }
+
+    // FIX: Usar prefillOrPayload en lugar de prefill que no existía
+    setContactPrefill(view === 'contact' ? prefillOrPayload : null);
     setCurrentView(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Selección de producto para detalle condicional
   const handleSelectProduct = (id) => {
     setSelectedProductId(id);
     setCurrentView('detail');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Operaciones del Carrito
   const handleAddToCart = (product, quantity = 1) => {
     setCart((prevCart) => {
-      const existing = prevCart.find((item) => item.id === product.id);
+      const existing = prevCart.find((item) => (item._id || item.id) === (product._id || product.id));
       if (existing) {
         return prevCart.map((item) =>
-          item.id === product.id
+          (item._id || item.id) === (product._id || product.id)
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
@@ -99,23 +243,58 @@ export function App() {
     }
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item.id === productId ? { ...item, quantity: newQuantity } : item
+        (item._id || item.id) === productId ? { ...item, quantity: newQuantity } : item
       )
     );
   };
 
   const handleRemoveFromCart = (productId) => {
-    setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
+    setCart((prevCart) => prevCart.filter((item) => (item._id || item.id) !== productId));
   };
 
   const handleClearCart = () => {
     setCart([]);
   };
 
-  // Total de unidades para pasar por props a la Navbar
+  const handleCheckout = () => {
+    setCart([]);
+    setIsCartOpen(false);
+    setToastMessage('Recibimos tu pedido. El taller te contactará para coordinar el despacho.');
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const reloadProducts = async () => {
+    const data = await productService.getProducts();
+    setProducts(data);
+    return data;
+  };
+
+  const handleProductCreated = async (created) => {
+    await reloadProducts();
+    setToastMessage(`Se agregó ${created?.nombre || 'el producto'} al catálogo.`);
+    setTimeout(() => setToastMessage(null), 4000);
+    setCurrentView('admin');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleAuthSuccess = ({ user: nextUser, token: nextToken }) => {
+    setUser(nextUser);
+    setToken(nextToken);
+    setIsLoginOpen(false);
+    setCurrentView('home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    setUser(null);
+    setToken(null);
+    setCurrentView('home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  // Renderizado condicional de la vista activa (Requisito Sprint 3 y 4)
   const renderCurrentView = () => {
     switch (currentView) {
       case 'home':
@@ -125,6 +304,7 @@ export function App() {
             onSelectProduct={handleSelectProduct}
             onAddToCart={handleAddToCart}
             onNavigate={handleNavigate}
+            isAdmin={isUserAdmin}
           />
         );
       case 'catalog':
@@ -143,11 +323,53 @@ export function App() {
             productId={selectedProductId}
             onBack={() => handleNavigate('catalog')}
             onAddToCart={handleAddToCart}
+            isAdmin={isUserAdmin}
+            onNavigate={handleNavigate}
             onSelectRelated={handleSelectProduct}
           />
         );
       case 'contact':
-        return <ContactPage />;
+        return <ContactPage prefill={contactPrefill} />;
+      case 'admin-create':
+        return isUserAdmin
+          ? <AdminCreateProductPage onCreated={handleProductCreated} onCancel={() => handleNavigate('admin')} />
+          : null;
+      case 'admin':
+        return isUserAdmin
+          ? ( 
+          <AdminPage 
+            products={products} 
+            onProductsChange={reloadProducts} 
+            onNavigate={handleNavigate}
+            editProductId={editProductId} 
+          />
+          )
+          : (
+            <HomePage
+              products={products}
+              onSelectProduct={handleSelectProduct}
+              onAddToCart={handleAddToCart}
+              onNavigate={handleNavigate}
+              isAdmin={isUserAdmin}
+            />
+          );
+      case 'profile':
+        return user
+          ? (
+            <UserProfilePage
+              user={user}
+              onLogout={handleLogout}
+            />
+          )
+          : (
+            <HomePage
+              products={products}
+              onSelectProduct={handleSelectProduct}
+              onAddToCart={handleAddToCart}
+              onNavigate={handleNavigate}
+              isAdmin={isUserAdmin}
+            />
+          );
       default:
         return (
           <HomePage
@@ -155,6 +377,7 @@ export function App() {
             onSelectProduct={handleSelectProduct}
             onAddToCart={handleAddToCart}
             onNavigate={handleNavigate}
+            isAdmin={isUserAdmin}
           />
         );
     }
@@ -162,23 +385,27 @@ export function App() {
 
   return (
     <div className="app-container">
-      {/* Navbar oficial con contador dinámico vía props */}
       <Navbar
         cartCount={totalCartCount}
         currentView={currentView}
         onNavigate={handleNavigate}
         onOpenCart={() => setIsCartOpen(true)}
+        user={user}
+        isAdmin={isUserAdmin}
+        onOpenLogin={() => setIsLoginOpen(true)}
+        onLogout={handleLogout}
       />
 
-      {/* Vista renderizada dinámicamente con su semántica original */}
       <div className="app-view-container">
         {renderCurrentView()}
       </div>
 
-      {/* Footer corporativo oficial */}
-      <Footer onNavigate={handleNavigate} />
+      <Footer
+        onNavigate={handleNavigate}
+        user={user}
+        onOpenLogin={() => setIsLoginOpen(true)}
+      />
 
-      {/* Modal del Carrito */}
       <CartModal
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
@@ -186,7 +413,36 @@ export function App() {
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveFromCart}
         onClearCart={handleClearCart}
+        onCheckout={handleCheckout}
       />
+
+      <LoginModal
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        onAuthSuccess={handleAuthSuccess}
+      />
+
+      {toastMessage && (
+        <div className="toast-container" aria-live="polite">
+          <div className="custom-toast" style={{
+            backgroundColor: 'var(--siena-tostado)',
+            color: '#fff',
+            padding: '1rem 1.5rem',
+            borderRadius: '8px',
+            boxShadow: 'var(--shadow-md)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            zIndex: 1000
+          }}>
+            <span>✓</span>
+            <span>{toastMessage}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

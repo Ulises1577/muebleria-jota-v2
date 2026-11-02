@@ -77,3 +77,7 @@
   border-top: 1px solid var(--color-border, #E8DDCE);
   background-color: var(--alabastro-claro, #FAF6F0);
 }
+
+body.modal-open {
+  overflow: hidden;
+}

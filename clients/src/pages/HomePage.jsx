@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import Sostenibilidad from '../components/Sostenibilidad';
 
-export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
+export const HomePage = ({ products = [], onSelectProduct, onNavigate, isAdmin = false }) => {
   // Destacados oficiales: IDs 1, 4, 7 y 8
   const destacadosIds = [1, 4, 7, 8];
   const destacados = products.filter(p => destacadosIds.includes(p.id));
@@ -47,13 +47,15 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
             >
               Explorar colección
             </button>
-            <button
-              type="button"
-              className="home-button home-button--ghost"
-              onClick={() => onNavigate('contact')}
-            >
-              Visitar el taller
-            </button>
+            {!isAdmin && (
+              <button
+                type="button"
+                className="home-button home-button--ghost"
+                onClick={() => onNavigate('contact')}
+              >
+                Visitar el taller
+              </button>
+            )}
           </div>
         </div>
 
@@ -76,7 +78,7 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
       <section className="home-section home-container" aria-labelledby="featured-title" data-reveal>
         <div className="section-heading">
           <div>
-            <span className="section-eyebrow">Selección de la casa</span>
+            <span className="eyebrow">Selección de la casa</span>
             <h2 id="featured-title">Productos destacados</h2>
           </div>
           <a 
@@ -145,7 +147,7 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
       {/* Sección Historia Oficial */}
       <section className="history-section home-container" aria-labelledby="history-title" data-reveal>
         <div className="history-copy">
-          <span className="section-eyebrow">Nuestra historia</span>
+          <span className="eyebrow">Nuestra historia</span>
           <h2 id="history-title">Una tradición que sigue viva</h2>
           <p>
             En 1960, Juan José fundó en Buenos Aires una pequeña carpintería que llevaba su apellido y su pasión por el trabajo artesanal. Lo que comenzó como un modesto taller pronto se transformó en la reconocida mueblería Hermanos Jota.
@@ -167,9 +169,11 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate }) => {
             <h2 id="cta-title">Las piezas se entienden en persona</h2>
             <p>Visitá la casa taller en Av. San Juan 2847, San Cristóbal, y tocá la madera antes de elegir.</p>
           </div>
-          <button type="button" className="home-button home-button--light" onClick={() => onNavigate('contact')}>
-            Visitar el taller
-          </button>
+          {!isAdmin && (
+            <button type="button" className="home-button home-button--light" onClick={() => onNavigate('contact')}>
+              Visitar el taller
+            </button>
+          )}
         </div>
       </section>
     </div>

@@ -94,7 +94,8 @@ export const ProductController = {
         descripcion: payload.descripcion?.trim() || '',
         precio: Number(payload.precio),
         stock: Number(payload.stock ?? 0),
-        imagenUrl: payload.imagenUrl?.trim() || ''
+        categoria: payload.categoria?.trim() || 'Colección',
+        imagenUrl: payload.imagenUrl?.trim() || payload.imagen?.trim() || ''
       });
 
       return res.status(201).json({
@@ -131,7 +132,8 @@ export const ProductController = {
         descripcion: payload.descripcion?.trim() || '',
         precio: Number(payload.precio),
         stock: Number(payload.stock ?? 0),
-        imagenUrl: payload.imagenUrl?.trim() || ''
+        categoria: payload.categoria?.trim() || 'Colección',
+        imagenUrl: payload.imagenUrl?.trim() || payload.imagen?.trim() || ''
       });
 
       if (!updatedProduct) {

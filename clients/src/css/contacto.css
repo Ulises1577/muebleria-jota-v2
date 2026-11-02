@@ -1,5 +1,6 @@
 :root {
     --siena-tostado: #a0522d;
+    --siena-tostado-hover: #874322;
     --verde-salvia: #87a96b;
     --alabastro: #f5e6d3;
     --vara-de-oro: #d4a437;
@@ -242,13 +243,15 @@
   }
   
   .eyebrow {
-    font-size: 0.8rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--verde-salvia);
-    margin: 0 0 12px;
-  }
+  display: block;                  /* Para que respete márgenes e interlineado */
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif); /* Fuerza la tipografía limpia sin serifas */
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--siena-tostado-hover);
+  margin-bottom: 8px;
+}
   
   .contacto-hero h1 {
     font-size: clamp(1.8rem, 4vw, 2.5rem);
@@ -327,45 +330,9 @@
     margin: 0;
   }
   
-  .esquina {
-    position: absolute;
-    width: 22px;
-    height: 22px;
-    border: 2px solid var(--vara-de-oro);
-  }
-  
-  .esquina--tl {
-    top: 12px;
-    left: 12px;
-    border-right: none;
-    border-bottom: none;
-  }
-  .esquina--tr {
-    top: 12px;
-    right: 12px;
-    border-left: none;
-    border-bottom: none;
-  }
-  
-  .esquina--bl {
-    bottom: 12px;
-    left: 12px;
-    border-right: none;
-    border-top: none;
-  }
-  
-  .esquina--br {
-    bottom: 12px;
-    right: 12px;
-    border-left: none;
-    border-top: none;
-  }
-  
-  .panel-form {
-    background: var(--superficie);
-    border-radius: var(--radio);
-    padding: 44px 36px;
-    box-shadow: 0 10px 24px rgba(51, 37, 28, 0.1);
+  .esquina,
+  .panel-info__esquinas {
+    display: none !important;
   }
   
   .campo {
