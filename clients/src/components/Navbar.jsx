@@ -116,43 +116,7 @@ export const Navbar = ({
         </nav>
 
         <div className="header-actions">
-          {user ? (
-            <div className="user-menu" ref={userMenuRef}>
-              <button
-                type="button"
-                className="user-avatar-btn"
-                aria-haspopup="menu"
-                aria-expanded={isUserMenuOpen}
-                onClick={() => setIsUserMenuOpen((open) => !open)}
-              >
-                <span className="user-avatar">{initials}</span>
-                <span className="user-name">{user.nombre}</span>
-              </button>
-              {isUserMenuOpen && (
-                <div className="user-dropdown" role="menu">
-                  {isUserAdmin && (
-                    <button type="button" onClick={(e) => handleLinkClick('admin', e)}>
-                      Gestionar mis productos
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      onLogout();
-                    }}
-                  >
-                    Cerrar Sesión
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <button type="button" className="session-button" onClick={onOpenLogin}>
-              Iniciar Sesión
-            </button>
-          )}
-
+          {/* 1. Botón de acción principal: Gestionar mis productos (para admin) o Carrito (para clientes) */}
           {isUserAdmin ? (
             <button
               type="button"
@@ -176,6 +140,39 @@ export const Navbar = ({
               <span className={`cart-badge ${cartCount > 0 ? 'bump' : ''}`} data-cart-count aria-live="polite">
                 {cartCount}
               </span>
+            </button>
+          )}
+
+          {/* 2. Sesión / Cuenta de usuario pegada a la derecha del todo */}
+          {user ? (
+            <div className="user-menu" ref={userMenuRef}>
+              <button
+                type="button"
+                className="user-avatar-btn"
+                aria-haspopup="menu"
+                aria-expanded={isUserMenuOpen}
+                onClick={() => setIsUserMenuOpen((open) => !open)}
+              >
+                <span className="user-avatar">{initials}</span>
+                <span className="user-name">{user.nombre}</span>
+              </button>
+              {isUserMenuOpen && (
+                <div className="user-dropdown" role="menu">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      onLogout();
+                    }}
+                  >
+                    Cerrar Sesión
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button type="button" className="session-button" onClick={onOpenLogin}>
+              Iniciar Sesión
             </button>
           )}
         </div>
