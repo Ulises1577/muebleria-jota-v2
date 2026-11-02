@@ -347,7 +347,7 @@ ul, ol {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--verde-salvia-dark);
+  color: var(--siena-tostado-dark);
 }
 
 .product-title {
@@ -370,13 +370,13 @@ ul, ol {
 .product-price {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--color-text-main);
+  color: var(--siena-tostado-hover);
   letter-spacing: -0.02em;
 }
 
 .product-installments {
   font-size: 0.875rem;
-  color: var(--verde-salvia-dark);
+  color: var(--siena-tostado);
   font-weight: 500;
 }
 
@@ -544,7 +544,7 @@ ul, ol {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--verde-salvia-dark);
+  color: var(--siena-tostado-dark);
 }
 
 .section-heading {
