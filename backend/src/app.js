@@ -6,6 +6,7 @@ import { requestLogger } from './middleware/logger.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 import productRoutes from './routes/productRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
 import { config } from './config/env.js';
 
 const app = express();
@@ -40,7 +41,9 @@ app.get('/', (req, res) => {
     status: 'online',
     endpoints: {
       productos: '/api/productos',
-      productoDetalle: '/api/productos/:id'
+      productoDetalle: '/api/productos/:id',
+      auth: '/api/auth',
+      pedidos: '/api/pedidos'
     }
   });
 });
@@ -57,8 +60,19 @@ const swaggerOptions = {
       { url: `http://localhost:${config.port}` },
       { url: 'https://<app-name>.onrender.com' }
     ],
-    tags: [{ name: 'Productos', description: 'Gestión de productos del catálogo' }],
+    tags: [
+      { name: 'Productos', description: 'Gestión de productos del catálogo' },
+      { name: 'Autenticación', description: 'Registro, login y perfil de usuarios' },
+      { name: 'Pedidos', description: 'Gestión y creación de pedidos' }
+    ],
     components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      },
       schemas: {
         Product: {
           type: 'object',
@@ -94,6 +108,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/productos', productRoutes);
+app.use('/api/pedidos', orderRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
