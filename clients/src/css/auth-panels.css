@@ -576,3 +576,99 @@ header .header-actions .cart-button {
 .logout-btn:hover {
   background: #f0e4d6;
 }
+
+
+/* ===== Páginas independientes de Login y Registro ===== */
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 180px);
+  padding: 2rem 1rem;
+  background: linear-gradient(
+    135deg,
+    var(--alabastro-claro, #FAF6F0) 0%,
+    var(--alabastro-calido, #F5E6D3) 100%
+  );
+}
+
+.auth-page-card {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  padding: 42px 32px 32px;
+  background: var(--color-card-bg, #FFFFFF);
+  border-radius: 4px;
+  box-shadow: 0 24px 48px rgba(51, 37, 28, 0.15);
+}
+
+.auth-page-card h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--siena-tostado, #A0522D);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 8px;
+}
+
+.auth-page-card .auth-lead {
+  color: var(--color-text-secondary, #6E6259);
+  font-family: 'Inter', system-ui, sans-serif;
+  margin-bottom: 1rem;
+}
+
+.auth-page-card .test-credentials-info {
+  background-color: var(--bg-card, #faf6f0);
+  border-left: 3px solid var(--siena-tostado, #8b5a2b);
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.82rem;
+  color: #555;
+  border-radius: 0 4px 4px 0;
+}
+
+.auth-page-card .auth-alert {
+  margin-bottom: 1rem;
+  padding: 0.8rem 0.9rem;
+  background: var(--rosa-polvoriento-light, #F7ECE9);
+  color: var(--siena-tostado-dark, #5C2B14);
+  border-left: 3px solid var(--rosa-polvoriento, #C47A6D);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.9rem;
+  border-radius: 0 4px 4px 0;
+}
+
+.auth-success {
+  margin-bottom: 1rem;
+  padding: 0.8rem 0.9rem;
+  background: var(--verde-salvia-light, #EBF2E6);
+  color: var(--verde-salvia-dark, #557544);
+  border-left: 3px solid var(--verde-salvia, #87A96B);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.9rem;
+  border-radius: 0 4px 4px 0;
+}
+
+.auth-link {
+  color: var(--siena-tostado, #A0522D);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.auth-link:hover {
+  color: var(--siena-tostado-hover, #874322);
+  text-decoration: underline;
+}
+
+@media (max-width: 520px) {
+  .auth-page {
+    padding: 1rem 0.75rem;
+    align-items: flex-start;
+    padding-top: 2rem;
+  }
+
+  .auth-page-card {
+    padding: 28px 20px 24px;
+    box-shadow: 0 12px 24px rgba(51, 37, 28, 0.1);
+  }
+}

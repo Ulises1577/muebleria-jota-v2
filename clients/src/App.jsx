@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { CartModal } from './components/CartModal';
 import { LoginModal } from './components/LoginModal';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
 import { HomePage } from './pages/HomePage';
 import { CatalogPage } from './pages/CatalogPage';
 import { DetailPage } from './pages/DetailPage';
@@ -42,6 +45,9 @@ const parsePath = (pathname, allowAdmin = false) => {
 const isAdminView = (view) => view === 'admin' || view === 'admin-create';
 
 export function App() {
+  const routerNavigate = useNavigate();
+  const routerLocation = useLocation();
+
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -153,7 +159,7 @@ export function App() {
       setUser(null);
       setToken(null);
       setCurrentView('home');
-      setIsLoginOpen(true);
+      routerNavigate('/login', { state: { from: window.location.pathname } });
     };
     window.addEventListener(SESSION_EXPIRED_EVENT, handleExpired);
     return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleExpired);
@@ -190,7 +196,7 @@ export function App() {
 
     if (isAdminView(view) && !isUserAdmin) {
       if (!user) {
-        setIsLoginOpen(true);
+        routerNavigate('/login', { state: { from: pathForView(view) } });
         return;
       }
       setCurrentView('home');
@@ -199,7 +205,7 @@ export function App() {
     }
 
     if (view === 'profile' && !user) {
-      setIsLoginOpen(true);
+      routerNavigate('/login', { state: { from: '/perfil' } });
       return;
     }
 
@@ -281,8 +287,13 @@ export function App() {
     setUser(nextUser);
     setToken(nextToken);
     setIsLoginOpen(false);
-    setCurrentView('home');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Solo navegar a home si estamos en la ruta de login/registro del modal.
+    // Las páginas independientes manejan su propia redirección.
+    const isOnAuthPage = routerLocation.pathname === '/login' || routerLocation.pathname === '/registro';
+    if (!isOnAuthPage) {
+      setCurrentView('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleLogout = () => {
@@ -384,66 +395,92 @@ export function App() {
   };
 
   return (
-    <div className="app-container">
-      <Navbar
-        cartCount={totalCartCount}
-        currentView={currentView}
-        onNavigate={handleNavigate}
-        onOpenCart={() => setIsCartOpen(true)}
-        user={user}
-        isAdmin={isUserAdmin}
-        onOpenLogin={() => setIsLoginOpen(true)}
-        onLogout={handleLogout}
+    <Routes>
+      {/* Rutas independientes de autenticación (sin Navbar/Footer) */}
+      <Route
+        path="/login"
+        element={
+          user
+            ? <Navigate to="/" replace />
+            : <LoginPage onAuthSuccess={handleAuthSuccess} />
+        }
+      />
+      <Route
+        path="/registro"
+        element={
+          user
+            ? <Navigate to="/" replace />
+            : <RegisterPage onAuthSuccess={handleAuthSuccess} />
+        }
       />
 
-      <div className="app-view-container">
-        {renderCurrentView()}
-      </div>
+      {/* Todas las demás rutas: layout completo con Navbar + Footer */}
+      <Route
+        path="*"
+        element={
+          <div className="app-container">
+            <Navbar
+              cartCount={totalCartCount}
+              currentView={currentView}
+              onNavigate={handleNavigate}
+              onOpenCart={() => setIsCartOpen(true)}
+              user={user}
+              isAdmin={isUserAdmin}
+              onOpenLogin={() => routerNavigate('/login')}
+              onLogout={handleLogout}
+            />
 
-      <Footer
-        onNavigate={handleNavigate}
-        user={user}
-        onOpenLogin={() => setIsLoginOpen(true)}
-      />
+            <div className="app-view-container">
+              {renderCurrentView()}
+            </div>
 
-      <CartModal
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cart={cart}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemoveItem={handleRemoveFromCart}
-        onClearCart={handleClearCart}
-        onCheckout={handleCheckout}
-      />
+            <Footer
+              onNavigate={handleNavigate}
+              user={user}
+              onOpenLogin={() => routerNavigate('/login')}
+            />
 
-      <LoginModal
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-        onAuthSuccess={handleAuthSuccess}
-      />
+            <CartModal
+              isOpen={isCartOpen}
+              onClose={() => setIsCartOpen(false)}
+              cart={cart}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemoveItem={handleRemoveFromCart}
+              onClearCart={handleClearCart}
+              onCheckout={handleCheckout}
+            />
 
-      {toastMessage && (
-        <div className="toast-container" aria-live="polite">
-          <div className="custom-toast" style={{
-            backgroundColor: 'var(--siena-tostado)',
-            color: '#fff',
-            padding: '1rem 1.5rem',
-            borderRadius: '8px',
-            boxShadow: 'var(--shadow-md)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            position: 'fixed',
-            bottom: '24px',
-            right: '24px',
-            zIndex: 1000
-          }}>
-            <span>✓</span>
-            <span>{toastMessage}</span>
+            <LoginModal
+              isOpen={isLoginOpen}
+              onClose={() => setIsLoginOpen(false)}
+              onAuthSuccess={handleAuthSuccess}
+            />
+
+            {toastMessage && (
+              <div className="toast-container" aria-live="polite">
+                <div className="custom-toast" style={{
+                  backgroundColor: 'var(--siena-tostado)',
+                  color: '#fff',
+                  padding: '1rem 1.5rem',
+                  borderRadius: '8px',
+                  boxShadow: 'var(--shadow-md)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  position: 'fixed',
+                  bottom: '24px',
+                  right: '24px',
+                  zIndex: 1000
+                }}>
+                  <span>✓</span>
+                  <span>{toastMessage}</span>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-    </div>
+        }
+      />
+    </Routes>
   );
 }
 
