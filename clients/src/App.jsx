@@ -429,6 +429,16 @@ export function App() {
               onOpenLogin={() => routerNavigate('/login')}
               onLogout={handleLogout}
             />
+              <Route element={<SiteLayout />}>
+                <Route index element={<HomePage />} />
+                <Route path={ROUTES.catalog} element={<CatalogPage />} />
+                <Route path="/productos/:id" element={<DetailPage />} />
+                <Route path={ROUTES.contact} element={<CustomerOnly><ContactPage /></CustomerOnly>} />
+                <Route path={ROUTES.profile} element={<RequireAuth><UserProfilePage /></RequireAuth>} />
+                <Route path="/pedidos" element={<Navigate to={ROUTES.profile} replace />} />
+                <Route path="/mis-pedidos" element={<Navigate to={ROUTES.profile} replace />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Route>
 
             <div className="app-view-container">
               {renderCurrentView()}
