@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Alert, Badge, Button, Card, EmptyState, Field, Input, PageHeader, Spinner } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -23,32 +23,16 @@ function OrderTimeline({ estado }) {
 }
 
 export function UserProfilePage() {
+  useDocumentTitle('Mi cuenta');
   const { user, isAdmin, updateProfile, logout } = useAuth();
   const { notify } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  useDocumentTitle(isAdmin ? 'Mi cuenta' : 'Mi Perfil');
 
   const [form, setForm] = useState({ nombre: user.nombre || '', telefono: user.telefono || '', direccion: user.direccion || '' });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
   const [orders, setOrders] = useState([]);
   const [ordersState, setOrdersState] = useState({ loading: true, error: null });
-
-  useEffect(() => {
-    if (location.hash === '#pedidos') {
-      const timer = setTimeout(() => {
-        const el = document.getElementById('pedidos');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
-      return () => clearTimeout(timer);
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [location.hash]);
 
   useEffect(() => {
     setForm({ nombre: user.nombre || '', telefono: user.telefono || '', direccion: user.direccion || '' });
@@ -111,7 +95,7 @@ export function UserProfilePage() {
       />
 
       <div className="profile-layout">
-        <Card as="section" id="perfil" aria-labelledby="profile-data-title">
+        <Card as="section" aria-labelledby="profile-data-title">
           <div className="profile-id">
             <span className="avatar avatar--lg" aria-hidden="true">{getInitials(user.nombre)}</span>
             <div>
@@ -139,7 +123,7 @@ export function UserProfilePage() {
           </form>
         </Card>
 
-        <Card as="section" id="pedidos" aria-labelledby="orders-title">
+        <Card as="section" aria-labelledby="orders-title">
           <div className="section-heading section-heading--compact">
             <h2 id="orders-title" className="section-title">Mis pedidos</h2>
             {!ordersState.loading && <span className="text-muted">{pluralize(orders.length, 'pedido')}</span>}

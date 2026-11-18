@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { CLIENT_NAV, PUBLIC_NAV, ROUTES } from '../../config/routes';
+import { PUBLIC_NAV, ROUTES } from '../../config/routes';
 import { BRAND, WORKSHOP } from '../../config/site';
 import { API_ORIGIN, checkApiHealth } from '../../services/apiClient';
 
@@ -9,7 +9,7 @@ const YEAR = new Date().getFullYear();
 
 export function SiteFooter() {
   const { user, isAdmin } = useAuth();
-  const links = user && !isAdmin ? CLIENT_NAV : PUBLIC_NAV.filter((link) => !(link.hideForAdmin && isAdmin));
+  const links = PUBLIC_NAV.filter((link) => !(link.hideForAdmin && isAdmin));
 
   return (
     <footer className="site-footer">
@@ -27,16 +27,7 @@ export function SiteFooter() {
                 <Link to={link.to}>{link.label}</Link>
               </li>
             ))}
-            {!user && (
-              <li>
-                <Link to={ROUTES.login}>Ingresar</Link>
-              </li>
-            )}
-            {isAdmin && (
-              <li>
-                <Link to={ROUTES.profile}>Mi cuenta</Link>
-              </li>
-            )}
+            <li>{user ? <Link to={ROUTES.profile}>Mi cuenta</Link> : <Link to={ROUTES.login}>Ingresar</Link>}</li>
           </ul>
         </div>
 

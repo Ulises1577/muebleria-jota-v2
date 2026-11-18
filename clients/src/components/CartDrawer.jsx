@@ -84,7 +84,6 @@ export function CartDrawer() {
       }
       reload().catch(() => {});
       notify(`Pedido #${shortId(order?._id)} confirmado. El taller te contactará para coordinar la entrega.`);
-      navigate(ROUTES.profile);
     } catch (error) {
       setSubmitError(error.message);
       // Si el problema fue el stock, se refresca el catálogo para mostrar las unidades reales

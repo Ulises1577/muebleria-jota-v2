@@ -112,7 +112,9 @@
   color: var(--color-primary);
   font-family: var(--font-serif);
   font-size: var(--text-3xl);
+  font-style: italic;
   font-weight: 400;
+  letter-spacing: .04em;
   line-height: var(--leading-tight);
   text-transform: uppercase;
   text-wrap: balance;
@@ -240,7 +242,7 @@
   border: 1px solid var(--color-primary-tint);
   border-radius: var(--radius-sm);
 }
-.callout__title { font-family: var(--font-sans); font-size: var(--text-lg); font-weight: 700; }
+.callout__title { font-family: var(--font-serif); font-size: var(--text-lg); font-weight: 700; }
 .callout__text { margin-top: var(--space-1); color: var(--color-text-muted); font-size: var(--text-sm); }
 
 /* ---------- Formularios ---------- */
@@ -359,7 +361,6 @@
   border: 0; border-inline: 1px solid var(--color-border);
   text-align: center; font-weight: 600; font-variant-numeric: tabular-nums;
   -moz-appearance: textfield;
-  appearance: none;
 }
 .quantity-stepper input::-webkit-inner-spin-button, .quantity-stepper input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .quantity-stepper--sm button { width: 28px; height: 30px; }
@@ -401,7 +402,7 @@
   border-radius: var(--radius-sm);
 }
 .thumb--empty { display: grid; place-items: center; color: var(--color-text-faint); }
-.cell-title { font-family: var(--font-sans); font-size: var(--text-base); font-weight: 600; line-height: 1.25; }
+.cell-title { font-family: var(--font-serif); font-size: var(--text-base); font-weight: 700; line-height: 1.25; }
 .cell-sub { margin-top: 2px; color: var(--color-text-muted); font-size: var(--text-2xs); letter-spacing: .04em; text-transform: uppercase; }
 .cell-clamp {
   display: -webkit-box;
@@ -412,7 +413,6 @@
   line-height: 1.5;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
-  line-clamp: 3;
 }
 .cell-actions { display: inline-flex; align-items: center; gap: var(--space-1); }
 
@@ -670,7 +670,6 @@
   font-size: var(--text-sm);
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  line-clamp: 2;
 }
 .product-card__footer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: auto; padding-top: var(--space-3); }
 .product-card__price { color: var(--color-text); font-family: var(--font-serif); font-size: var(--text-lg); font-weight: 700; font-variant-numeric: lining-nums; }

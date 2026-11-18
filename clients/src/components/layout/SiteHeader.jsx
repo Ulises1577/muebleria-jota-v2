@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
-import { ADMIN_NAV, CLIENT_NAV, PUBLIC_NAV, ROUTES } from '../../config/routes';
+import { ADMIN_NAV, PUBLIC_NAV, ROUTES } from '../../config/routes';
 import { BRAND, WORKSHOP } from '../../config/site';
 import { getWorkshopStatus } from '../../utils/hours';
 import { getInitials } from '../../utils/format';
@@ -57,15 +57,11 @@ function UserMenu() {
               <button type="button" role="menuitem" className="menu-item" onClick={() => go(ROUTES.home)}>
                 <Icon name="store" size={16} /> Ver la tienda
               </button>
-              <button type="button" role="menuitem" className="menu-item" onClick={() => go(ROUTES.profile)}>
-                <Icon name="user" size={16} /> Mi cuenta
-              </button>
             </>
-          ) : (
-            <button type="button" role="menuitem" className="menu-item" onClick={() => go(ROUTES.profile)}>
-              <Icon name="user" size={16} /> Mi Perfil
-            </button>
-          )}
+          ) : null}
+          <button type="button" role="menuitem" className="menu-item" onClick={() => go(ROUTES.profile)}>
+            <Icon name="user" size={16} /> {isAdmin ? 'Mi cuenta' : 'Mi cuenta y pedidos'}
+          </button>
           <div className="menu-divider" />
           <button
             type="button"
@@ -94,7 +90,7 @@ export function SiteHeader() {
 
   useEffect(() => setNavOpen(false), [location.pathname]);
 
-  const links = isAdmin ? ADMIN_NAV : user ? CLIENT_NAV : PUBLIC_NAV;
+  const links = isAdmin ? ADMIN_NAV : PUBLIC_NAV;
 
   return (
     <header className="site-header">
@@ -111,12 +107,7 @@ export function SiteHeader() {
           <ul className="main-nav__list">
             {links.map((link) => (
               <li key={link.to + link.label}>
-                <NavLink
-                  to={link.to}
-                  end={link.end}
-                  className="main-nav__link"
-                  onClick={() => setNavOpen(false)}
-                >
+                <NavLink to={link.to} end={link.end} className="main-nav__link">
                   {link.label}
                 </NavLink>
               </li>

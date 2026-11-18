@@ -1,181 +1,133 @@
 import React, { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import Sostenibilidad from '../components/Sostenibilidad';
+import { ProductCard, ProductCardSkeleton } from '../components/ProductCard';
+import { Eyebrow, Icon } from '../components/ui';
+import { useCatalog } from '../context/CatalogContext';
+import { useAuth } from '../context/AuthContext';
+import { useDocumentTitle } from '../hooks';
+import { ROUTES } from '../config/routes';
+import { BRAND, CATALOG, WORKSHOP } from '../config/site';
+import { getProductId, getStockStatus } from '../utils/inventory';
 
-export const HomePage = ({ products = [], onSelectProduct, onNavigate, isAdmin = false }) => {
-  // Destacados oficiales: IDs 1, 4, 7 y 8
-  const destacadosIds = [1, 4, 7, 8];
-  const destacados = products.filter(p => destacadosIds.includes(p.id));
-  const itemsAMostrar = destacados.length > 0 ? destacados : products.slice(0, 4);
-
-  // Revelado suave al hacer scroll (solo se activa si hay JS; respeta prefers-reduced-motion vía CSS)
-  const mainRef = useRef(null);
+function useScrollReveal() {
+  const ref = useRef(null);
   useEffect(() => {
-    const root = mainRef.current;
+    const root = ref.current;
     if (!root || typeof IntersectionObserver === 'undefined') return undefined;
     root.classList.add('reveal-ready');
-    const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => {
-        if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
-      }),
+    const observer = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        }),
       { threshold: 0.12, rootMargin: '0px 0px -6% 0px' }
     );
-    root.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
-    return () => { io.disconnect(); root.classList.remove('reveal-ready'); };
+    root.querySelectorAll('[data-reveal]').forEach((el) => observer.observe(el));
+    return () => {
+      observer.disconnect();
+      root.classList.remove('reveal-ready');
+    };
   }, []);
+  return ref;
+}
+
+export function HomePage() {
+  useDocumentTitle(null);
+  const { products, isLoading } = useCatalog();
+  const { isAdmin } = useAuth();
+  const ref = useScrollReveal();
+
+  // Destacados: primero las piezas con stock, en el orden del catálogo
+  const featured = [...products]
+    .sort((a, b) => Number(getStockStatus(a).key === 'out') - Number(getStockStatus(b).key === 'out'))
+    .slice(0, CATALOG.featuredCount);
 
   return (
-    <div className="home-main" ref={mainRef}>
-      {/* Hero: mismo concepto (aparador | título centrado | sillón), refinado */}
+    <div className="home" ref={ref}>
       <section className="home-hero" aria-labelledby="hero-title">
-        <img
-          src="/assets/aparador_uspallata_hero.png"
-          alt="Aparador Uspallata en nogal con frente de rejilla"
-          className="hero-side-img hero-img-left"
-          decoding="async"
-        />
-
-        <div className="home-container hero-content">
-          <h1 id="hero-title">Clase que se siente al tacto</h1>
-          <p>
-            Descubri la sensación de habitar Materiales de Verdad.
-          </p>
-          <div className="hero-actions">
-            <button
-              type="button"
-              className="home-button"
-              onClick={() => onNavigate('catalog')}
-            >
-              Explorar colección
-            </button>
+        <img src="/assets/aparador_uspallata_hero.png" alt="" className="home-hero__img home-hero__img--left" decoding="async" />
+        <div className="container home-hero__content">
+          <h1 id="hero-title" className="home-hero__title">Clase que se siente al tacto</h1>
+          <p className="home-hero__lead">Descubrí la sensación de habitar materiales de verdad.</p>
+          <div className="home-hero__actions">
+            <Link to={ROUTES.catalog} className="btn btn--primary btn--lg">
+              <span>Explorar colección</span>
+            </Link>
             {!isAdmin && (
-              <button
-                type="button"
-                className="home-button home-button--ghost"
-                onClick={() => onNavigate('contact')}
-              >
-                Visitar el taller
-              </button>
+              <Link to={ROUTES.contact} className="btn btn--outline btn--lg">
+                <span>Visitar el taller</span>
+              </Link>
             )}
           </div>
         </div>
-
-        <img
-          src="/assets/sillon_copacabana_hero.png"
-          alt="Sillón Copacabana en cuero y madera"
-          className="hero-side-img hero-img-right"
-          decoding="async"
-        />
+        <img src="/assets/sillon_copacabana_hero.png" alt="" className="home-hero__img home-hero__img--right" decoding="async" />
       </section>
 
-      {/* Datos de la casa (solo información ya presente en el sitio) */}
-      <ul className="home-values" aria-label="Sobre Hermanos Jota">
-        <li>Desde 1960</li>
-        <li>Casa taller en San Cristóbal</li>
-        <li>Diseño Mid-Century Modern</li>
+      <ul className="home-values" aria-label={`Sobre ${BRAND.name}`}>
+        <li>Desde {BRAND.foundedYear}</li>
+        <li>
+          {WORKSHOP.label} en {WORKSHOP.neighborhood}
+        </li>
+        <li>{BRAND.style}</li>
       </ul>
 
-      {/* Sección Productos Destacados */}
-      <section className="home-section home-container" aria-labelledby="featured-title" data-reveal>
+      <section className="container home-section" aria-labelledby="featured-title" data-reveal>
         <div className="section-heading">
           <div>
-            <span className="eyebrow">Selección de la casa</span>
-            <h2 id="featured-title">Productos destacados</h2>
+            <Eyebrow>Selección de la casa</Eyebrow>
+            <h2 id="featured-title" className="display-title">Productos destacados</h2>
           </div>
-          <a 
-            href="#catalogo" 
-            className="section-link"
-            onClick={(e) => { e.preventDefault(); onNavigate('catalog'); }}
-          >
-            Ver catálogo completo →
-          </a>
+          <Link to={ROUTES.catalog} className="section-link">
+            Ver catálogo completo <Icon name="arrow-right" size={16} />
+          </Link>
         </div>
 
-        <div id="featured-products-grid" className="featured-products-grid" aria-live="polite">
-          {itemsAMostrar.map((producto) => {
-            const precioFormateado = new Intl.NumberFormat('es-AR', {
-              style: 'currency',
-              currency: 'ARS',
-              maximumFractionDigits: 0
-            }).format(producto.precio);
-
-            return (
-              <article key={producto._id} className="featured-card">
-                <div 
-                  className="featured-image-wrap" 
-                  onClick={() => onSelectProduct(producto._id)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <img src={producto.imagenUrl} alt={producto.nombre} />
-                </div>
-                <div className="featured-card-body">
-                  <span className="featured-category">{producto.categoria || 'Colección'}</span>
-                  <h3 
-                    onClick={() => onSelectProduct(producto._id)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {producto.nombre}
-                  </h3>
-                  <p>{producto.descripcion}</p>
-                  <p className="featured-price">{precioFormateado}</p>
-                  <button 
-                    type="button"
-                    className="btn-detalle"
-                    onClick={() => onSelectProduct(producto._id)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--siena-tostado)',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      padding: 0,
-                      textAlign: 'left',
-                      textDecoration: 'underline'
-                    }}
-                  >
-                    Ver detalle
-                  </button>
-                </div>
-              </article>
-            );
-          })}
+        <div className="product-grid">
+          {isLoading
+            ? Array.from({ length: CATALOG.featuredCount }).map((_, index) => <ProductCardSkeleton key={index} />)
+            : featured.map((product) => (
+                <ProductCard key={getProductId(product)} product={product} />
+              ))}
         </div>
       </section>
 
-      {/* Nueva sección Sostenibilidad */}
       <Sostenibilidad />
 
-      {/* Sección Historia Oficial */}
-      <section className="history-section home-container" aria-labelledby="history-title" data-reveal>
-        <div className="history-copy">
-          <span className="eyebrow">Nuestra historia</span>
-          <h2 id="history-title">Una tradición que sigue viva</h2>
+      <section className="container history" aria-labelledby="history-title" data-reveal>
+        <div className="history__copy">
+          <Eyebrow>Nuestra historia</Eyebrow>
+          <h2 id="history-title" className="display-title">Una tradición que sigue viva</h2>
           <p>
-            En 1960, Juan José fundó en Buenos Aires una pequeña carpintería que llevaba su apellido y su pasión por el trabajo artesanal. Lo que comenzó como un modesto taller pronto se transformó en la reconocida mueblería Hermanos Jota.
+            En {BRAND.foundedYear}, Juan José fundó en Buenos Aires una pequeña carpintería que llevaba su apellido y su pasión por el
+            trabajo artesanal. Lo que comenzó como un modesto taller pronto se transformó en la reconocida mueblería {BRAND.name}.
           </p>
-          <p>
-            Hoy, bajo la dirección de Carla —tercera generación comprometida con la tradición familiar— seguimos creando piezas que acompañan la vida cotidiana.
-          </p>
+          <p>Hoy, bajo la dirección de Carla —tercera generación comprometida con la tradición familiar— seguimos creando piezas que acompañan la vida cotidiana.</p>
         </div>
-        <aside className="history-highlight">
-          <strong>Diseño Mid-Century Modern</strong>
+        <aside className="history__highlight">
+          <strong>{BRAND.style}</strong>
           Líneas limpias, materiales nobles, funcionalidad clara y una estética atemporal guían cada mueble que sale de nuestra casa taller.
         </aside>
       </section>
 
-      {/* Cierre de la página */}
       <section className="home-cta" aria-labelledby="cta-title" data-reveal>
-        <div className="home-container home-cta-inner">
+        <div className="container home-cta__inner">
           <div>
             <h2 id="cta-title">Las piezas se entienden en persona</h2>
-            <p>Visitá la casa taller en Av. San Juan 2847, San Cristóbal, y tocá la madera antes de elegir.</p>
+            <p>
+              Visitá la casa taller en {WORKSHOP.street}, {WORKSHOP.neighborhood}, y tocá la madera antes de elegir.
+            </p>
           </div>
           {!isAdmin && (
-            <button type="button" className="home-button home-button--light" onClick={() => onNavigate('contact')}>
-              Visitar el taller
-            </button>
+            <Link to={ROUTES.contact} className="btn btn--light btn--lg">
+              <span>Visitar el taller</span>
+            </Link>
           )}
         </div>
       </section>
     </div>
   );
-};
+}

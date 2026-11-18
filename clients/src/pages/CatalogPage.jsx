@@ -1,133 +1,121 @@
-import React, { useState } from 'react';
-import { ProductList } from '../components/ProductList';
+import React, { useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { ProductCard, ProductCardSkeleton } from '../components/ProductCard';
+import { Alert, Button, Card, EmptyState, FilterTabs, PageHeader, SearchInput, Select } from '../components/ui';
+import { useCatalog } from '../context/CatalogContext';
+import { useDocumentTitle } from '../hooks';
+import { getCategories, getProductId, getStockStatus, matchesProductSearch } from '../utils/inventory';
+import { pluralize } from '../utils/format';
 
-export const CatalogPage = ({ products = [], onSelectProduct, isLoading, error }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [category, setCategory] = useState('Todas');
-  const [sortOrder, setSortOrder] = useState('default');
+const SORTS = {
+  relevance: { label: 'Relevancia', fn: (a, b) => Number(getStockStatus(a).key === 'out') - Number(getStockStatus(b).key === 'out') },
+  'price-asc': { label: 'Precio: menor a mayor', fn: (a, b) => a.precio - b.precio },
+  'price-desc': { label: 'Precio: mayor a menor', fn: (a, b) => b.precio - a.precio },
+  'name-asc': { label: 'Nombre: A-Z', fn: (a, b) => a.nombre.localeCompare(b.nombre) }
+};
 
-  // Búsqueda en tiempo real (requisito funcional de productos.js)
-  const productosFiltrados = products.filter((p) => {
-    const texto = searchTerm.toLowerCase().trim();
+export function CatalogPage() {
+  useDocumentTitle('Catálogo');
+  const { products, isLoading, error, reload } = useCatalog();
 
-    const coincideBusqueda =
-      p.nombre.toLowerCase().includes(texto) ||
-      p.descripcion.toLowerCase().includes(texto);
+  // Los filtros viven en la URL: se pueden compartir y sobreviven a "atrás"
+  const [params, setParams] = useSearchParams();
+  const search = params.get('q') || '';
+  const category = params.get('categoria') || 'all';
+  const sort = SORTS[params.get('orden')] ? params.get('orden') : 'relevance';
+  const onlyAvailable = params.get('disponibles') === '1';
 
-    const coincideCategoria =
-      category === 'Todas' || p.categoria === category;
-
-    return coincideBusqueda && coincideCategoria;
-  });
-
-  const productosOrdenados = [...productosFiltrados].sort((a, b) => {
-    switch (sortOrder) {
-      case 'price-asc':
-        return a.precio - b.precio;
-
-      case 'price-desc':
-        return b.precio - a.precio;
-
-      case 'name-asc':
-        return a.nombre.localeCompare(b.nombre);
-
-      default:
-        return 0;
-    }
-  });
-
-  const limpiarFiltros = () => {
-    setSearchTerm('');
-    setCategory('Todas');
-    setSortOrder('default');
+  const updateParam = (key, value, defaultValue) => {
+    const next = new URLSearchParams(params);
+    if (!value || value === defaultValue) next.delete(key);
+    else next.set(key, value);
+    setParams(next, { replace: true });
   };
 
-  const hayFiltros = searchTerm || category !== 'Todas' || sortOrder !== 'default';
+  const categories = useMemo(() => getCategories(products), [products]);
+  const results = useMemo(
+    () =>
+      products
+        .filter(
+          (product) =>
+            matchesProductSearch(product, search) &&
+            (category === 'all' || product.categoria === category) &&
+            (!onlyAvailable || getStockStatus(product).key !== 'out')
+        )
+        .sort(SORTS[sort].fn),
+    [products, search, category, sort, onlyAvailable]
+  );
+
+  const hasFilters = Boolean(search || category !== 'all' || sort !== 'relevance' || onlyAvailable);
 
   return (
-    <main className="catalogo-main">
-      <section className="encabezado-catalogo">
-        <h1>Nuestra Colección</h1>
-        <p>Piezas únicas de mobiliario diseñadas con materiales sostenibles y acabado artesanal.</p>
-      </section>
+    <div className="container store-page">
+      <PageHeader
+        align="center"
+        eyebrow="Colección permanente"
+        title="Nuestra colección"
+        lead="Piezas únicas de mobiliario diseñadas con materiales sostenibles y acabado artesanal."
+      />
 
-      <div className="catalogo-contenedor">
-        {/* Barra de herramientas: búsqueda, categoría y orden en un solo bloque */}
-        <div className="catalogo-toolbar">
-          <div className="toolbar-campo toolbar-campo--busqueda buscador-container">
-            <label htmlFor="input-busqueda">Buscar</label>
-            <div className="buscador-input-wrap">
-              <svg className="buscador-icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input
-                type="text"
-                id="input-busqueda"
-                placeholder="Buscar por nombre o material..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="toolbar-campo filtros-catalogo">
-            <label htmlFor="filtro-categoria">Categoría</label>
-            <select
-              id="filtro-categoria"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              <option value="Todas">Todas</option>
-              <option value="Almacenamiento">Almacenamiento</option>
-              <option value="Mesas">Mesas</option>
-              <option value="Asientos">Asientos</option>
-              <option value="Oficina">Oficina</option>
-            </select>
-          </div>
-
-          <div className="toolbar-campo filtros-catalogo">
-            <label htmlFor="orden-productos">Ordenar por</label>
-            <select
-              id="orden-productos"
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-            >
-              <option value="default">Relevancia</option>
-              <option value="price-asc">Precio: menor a mayor</option>
-              <option value="price-desc">Precio: mayor a menor</option>
-              <option value="name-asc">Nombre: A-Z</option>
-            </select>
+      <Card padded={false} className="catalog-toolbar">
+        <div className="toolbar">
+          <SearchInput value={search} onChange={(value) => updateParam('q', value)} placeholder="Buscar por nombre o material…" label="Buscar en el catálogo" />
+          <div className="toolbar__end">
+            <label className="check-toggle">
+              <input type="checkbox" checked={onlyAvailable} onChange={(e) => updateParam('disponibles', e.target.checked ? '1' : '')} />
+              Solo disponibles
+            </label>
+            <Select value={sort} onChange={(e) => updateParam('orden', e.target.value, 'relevance')} aria-label="Ordenar productos">
+              {Object.entries(SORTS).map(([key, option]) => (
+                <option key={key} value={key}>{option.label}</option>
+              ))}
+            </Select>
           </div>
         </div>
-
-        {/* Resultados y limpiar filtros, alineados con la grilla */}
-        <div className="info-catalogo">
-          <p className="contador-resultados" aria-live="polite">
-            {productosOrdenados.length} {productosOrdenados.length === 1 ? 'producto' : 'productos'}
-          </p>
-
-          {hayFiltros && (
-            <button
-              type="button"
-              className="boton-limpiar"
-              onClick={limpiarFiltros}
-            >
-              Limpiar filtros
-            </button>
-          )}
-        </div>
-
-        <section className="contenedor-grilla">
-          <ProductList
-            products={productosOrdenados}
-            onSelectProduct={onSelectProduct}
-            isLoading={isLoading}
-            error={error}
-            onClearFilters={hayFiltros ? limpiarFiltros : undefined}
+        <div className="toolbar toolbar--divided">
+          <FilterTabs
+            label="Filtrar por categoría"
+            value={category}
+            onChange={(value) => updateParam('categoria', value, 'all')}
+            options={[{ value: 'all', label: 'Todas', count: products.length }, ...categories.map((c) => ({ value: c.name, label: c.name, count: c.count }))]}
           />
-        </section>
+        </div>
+      </Card>
+
+      <div className="results-bar">
+        <p aria-live="polite">{isLoading ? 'Cargando piezas…' : pluralize(results.length, 'producto')}</p>
+        {hasFilters && (
+          <Button variant="link" onClick={() => setParams({}, { replace: true })}>
+            Limpiar filtros
+          </Button>
+        )}
       </div>
-    </main>
+
+      {error ? (
+        <Alert action={<Button variant="outline" size="sm" icon="refresh" onClick={() => reload().catch(() => {})}>Reintentar</Button>}>
+          <strong>No pudimos cargar el catálogo.</strong> {error}
+        </Alert>
+      ) : isLoading ? (
+        <div className="product-grid">
+          {Array.from({ length: 6 }).map((_, index) => <ProductCardSkeleton key={index} />)}
+        </div>
+      ) : results.length === 0 ? (
+        <Card>
+          <EmptyState
+            icon="search"
+            title="No encontramos piezas para tu búsqueda"
+            action={hasFilters && <Button variant="outline" onClick={() => setParams({}, { replace: true })}>Limpiar filtros</Button>}
+          >
+            Probá con otro nombre, otra categoría o quitá los filtros para ver toda la colección.
+          </EmptyState>
+        </Card>
+      ) : (
+        <div className="product-grid">
+          {results.map((product) => (
+            <ProductCard key={getProductId(product)} product={product} />
+          ))}
+        </div>
+      )}
+    </div>
   );
-};
+}
