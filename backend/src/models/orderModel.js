@@ -42,6 +42,8 @@ export const Order = mongoose.model('Order', orderSchema);
 
 const fallbackOrders = [];
 
+export const ORDER_STATUSES = ['pendiente', 'confirmado', 'enviado', 'entregado'];
+
 export const OrderModel = {
   async create(orderData) {
     if (mongoose.connection.readyState === 1) {
@@ -90,6 +92,21 @@ export const OrderModel = {
     }
 
     return fallbackOrders.find((order) => String(order._id) === String(id)) || null;
+  },
+
+  async updateStatus(id, estado) {
+    if (mongoose.connection.readyState === 1) {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return null;
+      }
+      return Order.findByIdAndUpdate(id, { estado }, { new: true, runValidators: true }).lean();
+    }
+
+    const order = fallbackOrders.find((item) => String(item._id) === String(id));
+    if (!order) return null;
+    order.estado = estado;
+    order.updatedAt = new Date().toISOString();
+    return order;
   },
 
   async getAll() {

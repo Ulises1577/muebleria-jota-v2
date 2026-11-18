@@ -129,6 +129,16 @@ export const UserModel = {
   /**
    * Crear un nuevo usuario (registro)
    */
+  async getAll() {
+    if (mongoose.connection.readyState === 1) {
+      return User.find().select('-password').sort({ createdAt: -1 }).lean();
+    }
+
+    return fallbackUsers
+      .map(({ password, ...userWithoutPassword }) => userWithoutPassword)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  },
+
   async create(userData) {
     if (mongoose.connection.readyState === 1) {
       const user = await User.create(userData);

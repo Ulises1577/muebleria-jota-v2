@@ -1,28 +1,9 @@
-/* Importación de todos los estilos oficiales desarrollados en los Sprints 1 y 2 */
-/* index.css */
-@import './css/brand-theme.css';
-@import './css/typography.css';
-/* @import './css/navbar.css'; */
-@import './css/styles.css';
-@import './css/productos.css';
-@import './css/producto.css';
-@import './css/contacto.css';
-/* El footer va después de producto/contacto: ambos traían copias del pie oscuro */
-@import './css/footer.css';
-@import './css/polish.css';
-@import './css/header-unico.css';
-@import './css/auth-panels.css';
-
-/* Ajustes mínimos para integración fluida de React */
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-body {
-  min-height: 100vh;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-}
+/* Punto de entrada de estilos: tokens → base → componentes → estructura → vistas */
+@import './styles/tokens.css';
+@import './styles/base.css';
+@import './styles/components.css';
+@import './styles/layout.css';
+@import './styles/pages/home.css';
+@import './styles/pages/store.css';
+@import './styles/pages/auth.css';
+@import './styles/pages/admin.css';

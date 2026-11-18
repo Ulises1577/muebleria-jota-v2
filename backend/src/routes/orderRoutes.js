@@ -132,4 +132,40 @@ router.get('/', verifyToken, requireAdmin, (req, res, next) => OrderController.g
  */
 router.get('/:id', verifyToken, (req, res, next) => OrderController.getOrderById(req, res, next));
 
+/**
+ * @swagger
+ * /api/pedidos/{id}/estado:
+ *   patch:
+ *     summary: Actualizar el estado de un pedido (Solo Administrador)
+ *     tags: [Pedidos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               estado:
+ *                 type: string
+ *                 enum: [pendiente, confirmado, enviado, entregado]
+ *     responses:
+ *       200:
+ *         description: Estado actualizado
+ *       400:
+ *         description: Estado inválido
+ *       403:
+ *         description: Requiere rol de administrador
+ *       404:
+ *         description: Pedido no encontrado
+ */
+router.patch('/:id/estado', verifyToken, requireAdmin, (req, res, next) => OrderController.updateOrderStatus(req, res, next));
+
 export default router;

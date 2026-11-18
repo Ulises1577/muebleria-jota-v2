@@ -22,3 +22,4 @@ yarn-error.log*
 !.vscode/settings.json
 !.vscode/extensions.json
 Microsoft/
+.claude

@@ -78,6 +78,12 @@ El servidor quedará disponible en: http://localhost:5000
 - `POST /api/productos` : Crear un producto nuevo.
 - `PUT /api/productos/:id` : Actualizar producto.
 - `DELETE /api/productos/:id` : Eliminar producto.  
+- `POST /api/auth/register`, `POST /api/auth/login`, `GET/PUT /api/auth/me` : Registro, login y perfil.
+- `POST /api/pedidos` : Crear un pedido (valida stock disponible y lo descuenta; responde 409 si no alcanza).
+- `GET /api/pedidos/mis-pedidos` : Pedidos del usuario autenticado.
+- `GET /api/pedidos` : Todos los pedidos (solo admin).
+- `PATCH /api/pedidos/:id/estado` : Cambiar estado `pendiente | confirmado | enviado | entregado` (solo admin).
+- `GET /api/usuarios` : Cuentas registradas sin contraseñas (solo admin).
 
 > ⚠️ **Nota de Configuración:** Dejamos las configuraciones en **`true`** intencionalmente porque estamos en un entorno académico y de aprendizaje. En producción, recuerden configurarlo siempre en **`false`**.
 
@@ -97,7 +103,32 @@ npm install
 # Iniciar servidor de desarrollo de Vite
 npm run dev
 ```
-La aplicación web se abrirá automáticamente en: `http://localhost:5173`
+La aplicación web se abrirá automáticamente en: `http://localhost:5174`
+
+La URL de la API se configura con `VITE_API_BASE_URL` (por defecto `http://localhost:5000/api`). Se sigue aceptando la variable anterior `VITE_API_URL` apuntando a `/api/productos`.
+
+#### Estructura del frontend
+
+```
+clients/src/
+├── config/        site.js (datos de marca, taller, negocio, umbral de stock, estados de pedido) y routes.js (rutas y menús)
+├── styles/        tokens.css (paleta, tipografía, espaciado) → base → components → layout → pages/*
+├── components/ui  Componentes compartidos: Button, Badge, StatCard, Modal, Field, FilterTabs, Pagination…
+├── components/    Cabecera, pie, carrito, tarjeta de producto y formulario de producto
+├── context/       Sesión, catálogo, carrito y avisos compartidos por toda la app
+├── services/      apiClient (único fetch con token y manejo de sesión vencida) + servicios por recurso
+├── utils/         Formato de moneda/fechas, cálculos de inventario, exportación CSV, horario del taller
+└── pages/         Tienda (inicio, catálogo, ficha, contacto, cuenta) y admin/ (productos, inventario, pedidos, clientes)
+```
+
+Para cambiar un dato del negocio (dirección, horarios, umbral de "bajo stock", filas por página, cuotas) se edita `config/site.js`; para un color o tamaño, `styles/tokens.css`.
+
+#### Panel de administración (`/admin`)
+
+- **Gestión de productos**: indicadores del catálogo, búsqueda, filtros por categoría y estado, columnas configurables, exportación CSV, alta/edición en modal y baja con confirmación.
+- **Inventario**: ajuste de unidades por pieza (individual o en lote) y filtro de piezas a reponer.
+- **Pedidos**: facturación, pedidos por despachar, detalle de entrega y cambio de estado.
+- **Clientes**: cuentas registradas cruzadas con sus pedidos y total comprado.
 
 ---
 

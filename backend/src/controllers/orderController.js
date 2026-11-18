@@ -1,4 +1,5 @@
-import { OrderModel } from '../models/orderModel.js';
+import { OrderModel, ORDER_STATUSES } from '../models/orderModel.js';
+import { ProductModel } from '../models/productModel.js';
 
 export const OrderController = {
   /**
@@ -59,6 +60,25 @@ export const OrderController = {
         });
       }
 
+      // 2b. Validar stock disponible antes de confirmar (solo productos que existen en el catálogo)
+      const stockUpdates = [];
+      for (const item of formattedItems) {
+        const product = await ProductModel.getById(item.productoId);
+        if (!product) continue;
+
+        const available = Number(product.stock ?? 0);
+        if (available < item.cantidad) {
+          return res.status(409).json({
+            success: false,
+            message: available > 0
+              ? `Solo quedan ${available} unidad(es) de "${item.nombre}".`
+              : `"${item.nombre}" está sin stock en este momento.`
+          });
+        }
+
+        stockUpdates.push({ id: product._id ?? product.id, stock: available - item.cantidad });
+      }
+
       // El total final es el calculado a partir de los items
       const finalTotal = total !== undefined && !Number.isNaN(Number(total)) && Number(total) >= 0
         ? Number(total)
@@ -79,6 +99,9 @@ export const OrderController = {
       };
 
       const newOrder = await OrderModel.create(orderData);
+
+      // 4. Descontar del inventario las unidades vendidas
+      await Promise.all(stockUpdates.map(({ id, stock }) => ProductModel.updateById(id, { stock })));
 
       return res.status(201).json({
         success: true,
@@ -150,6 +173,36 @@ export const OrderController = {
    * GET /api/pedidos
    * Obtiene todas las órdenes de la tienda (solo para administradores).
    */
+  async updateOrderStatus(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { estado } = req.body || {};
+
+      if (!ORDER_STATUSES.includes(estado)) {
+        return res.status(400).json({
+          success: false,
+          message: `Estado inválido. Valores permitidos: ${ORDER_STATUSES.join(', ')}.`
+        });
+      }
+
+      const order = await OrderModel.updateStatus(id, estado);
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: 'Pedido no encontrado.'
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: 'Estado del pedido actualizado.',
+        data: order
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async getAllOrders(req, res, next) {
     try {
       const orders = await OrderModel.getAll();
