@@ -1,43 +1,74 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '../config/routes';
+import { formatCurrency } from '../utils/format';
+import { getProductId, getStockStatus } from '../utils/inventory';
+import { Badge, Button } from './ui';
+import { useAuth } from '../context/AuthContext';
+import { useAddToCart } from '../context/CartContext';
 
-export const ProductCard = ({ product, onSelectProduct }) => {
-  const precioFormateado = product.precio.toLocaleString('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    maximumFractionDigits: 0
-  });
+/**
+ * Tarjeta de producto única para catálogo, destacados y relacionados.
+ * Lee sesión y carrito desde Context: clientes ven "Agregar", administradores ven stock y "Editar".
+ */
+export function ProductCard({ product, compact = false }) {
+  const { isAdmin } = useAuth();
+  const addToCart = useAddToCart();
+  const id = getProductId(product);
+  const status = getStockStatus(product);
+  const soldOut = status.key === 'out';
 
   return (
-    <article className="tarjeta-producto">
-      <div
-        className="producto-media"
-        onClick={() => onSelectProduct(product._id)}
-      >
-        <img
-          src={product.imagenUrl}
-          alt={product.nombre}
-          className="producto-imagen"
-          loading="lazy"
-        />
-      </div>
-      <div className="producto-info">
-        {product.categoria && (
-          <span className="producto-categoria">{product.categoria}</span>
+    <article className={`product-card ${compact ? 'product-card--compact' : ''}`}>
+      <div className="product-card__media">
+        {product.imagenUrl && <img src={product.imagenUrl} alt="" loading="lazy" />}
+        {(soldOut || isAdmin) && (
+          <span className="product-card__badge">
+            <Badge tone={status.tone}>{isAdmin && !soldOut ? `${product.stock} en stock` : status.label}</Badge>
+          </span>
         )}
-        <h3 onClick={() => onSelectProduct(product._id)}>
-          {product.nombre}
+      </div>
+      <div className="product-card__body">
+        <span className="product-card__category">{product.categoria}</span>
+        <h3 className="product-card__title">
+          <Link to={ROUTES.product(id)}>{product.nombre}</Link>
         </h3>
-        <p className="producto-descripcion">{product.descripcion}</p>
-        <p className="producto-precio">{precioFormateado}</p>
-        <button
-          type="button"
-          className="producto-cta"
-          onClick={() => onSelectProduct(product._id)}
-          aria-label={`Ver detalle de ${product.nombre}`}
-        >
-          Ver detalle
-        </button>
+        {!compact && <p className="product-card__text">{product.descripcion}</p>}
+        <div className="product-card__footer">
+          <span className="product-card__price">{formatCurrency(product.precio)}</span>
+          {isAdmin ? (
+            <Link to={ROUTES.admin} state={{ editProductId: id }} className="btn btn--outline btn--sm product-card__cta">
+              <span>Editar</span>
+            </Link>
+          ) : (
+            <Button
+                variant="outline"
+                size="sm"
+                icon="plus"
+                className="product-card__cta"
+                disabled={soldOut}
+                onClick={() => addToCart(product)}
+                aria-label={soldOut ? `${product.nombre} sin stock` : `Agregar ${product.nombre} al carrito`}
+              >
+                {soldOut ? 'Agotado' : 'Agregar'}
+              </Button>
+          )}
+        </div>
       </div>
     </article>
   );
-};
+}
+
+export function ProductCardSkeleton() {
+  return (
+    <div className="product-card product-card--skeleton" aria-hidden="true">
+      <span className="skeleton" style={{ aspectRatio: '4 / 3.4', borderRadius: 0 }} />
+      <div className="product-card__body">
+        <span className="skeleton" style={{ height: 10, width: '35%' }} />
+        <span className="skeleton" style={{ height: 18, width: '70%' }} />
+        <span className="skeleton" style={{ height: 12, width: '90%' }} />
+        <span className="skeleton" style={{ height: 16, width: '40%' }} />
+      </div>
+    </div>
+  );
+}

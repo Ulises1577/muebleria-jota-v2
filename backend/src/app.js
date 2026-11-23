@@ -7,6 +7,7 @@ import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 import productRoutes from './routes/productRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import { config } from './config/env.js';
 
 const app = express();
@@ -25,7 +26,7 @@ const corsOptions = {
     callback(new Error('Origen no permitido por CORS'));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key'],
   credentials: true
 };
 
@@ -43,7 +44,8 @@ app.get('/', (req, res) => {
       productos: '/api/productos',
       productoDetalle: '/api/productos/:id',
       auth: '/api/auth',
-      pedidos: '/api/pedidos'
+      pedidos: '/api/pedidos',
+      usuarios: '/api/usuarios'
     }
   });
 });
@@ -63,7 +65,8 @@ const swaggerOptions = {
     tags: [
       { name: 'Productos', description: 'Gestión de productos del catálogo' },
       { name: 'Autenticación', description: 'Registro, login y perfil de usuarios' },
-      { name: 'Pedidos', description: 'Gestión y creación de pedidos' }
+      { name: 'Pedidos', description: 'Gestión y creación de pedidos' },
+      { name: 'Usuarios', description: 'Administración de cuentas registradas' }
     ],
     components: {
       securitySchemes: {
@@ -109,6 +112,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/api/auth', authRoutes);
 app.use('/api/productos', productRoutes);
 app.use('/api/pedidos', orderRoutes);
+app.use('/api/usuarios', userRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 

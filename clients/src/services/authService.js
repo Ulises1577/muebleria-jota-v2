@@ -1,165 +1,57 @@
-const PRODUCTS_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/productos';
-const AUTH_URL = import.meta.env.VITE_AUTH_URL || PRODUCTS_URL.replace(/\/productos\/?$/, '/auth');
+import { apiRequest } from './apiClient';
+import { session, normalizeUser } from './session';
 
-const TOKEN_KEY = 'hermanos_jota_token';
-const USER_KEY = 'hermanos_jota_user';
+export { SESSION_EXPIRED_EVENT } from './apiClient';
 
-export const SESSION_EXPIRED_EVENT = 'hermanos-jota:session-expired';
-
-const normalizeUser = (user) => {
-  if (!user) return null;
-  const isAdmin = user.rol === 'admin' || user.role === 'admin' || Boolean(user.isAdmin);
-  return {
-    ...user,
-    id: user._id || user.id,
-    _id: user._id || user.id,
-    rol: isAdmin ? 'admin' : (user.rol || 'usuario'),
-    role: isAdmin ? 'admin' : (user.role || 'client'),
-    isAdmin
-  };
+const startSession = (result) => {
+  const user = normalizeUser(result.data.user);
+  session.save(result.data.token, user);
+  return { token: result.data.token, user };
 };
 
-// fetch que distingue "no hay conexión" de "el servidor respondió con error"
-const safeFetch = async (url, options) => {
-  try {
-    return await fetch(url, options);
-  } catch {
-    const error = new Error('No se pudo conectar con el servidor. Verificá que el backend esté activo.');
-    error.isNetworkError = true;
-    throw error;
-  }
-};
-
-// Lee el JSON y, si la respuesta no es OK, lanza un Error que conserva el status HTTP
-const readJson = async (response, fallbackMessage) => {
-  let payload = null;
-  try {
-    payload = await response.json();
-  } catch {
-    payload = null;
-  }
-
-  if (!response.ok) {
-    const error = new Error(payload?.message || fallbackMessage);
-    error.status = response.status;
-    throw error;
-  }
-
-  if (!payload) {
-    throw new Error(fallbackMessage);
-  }
-
-  return payload;
-};
-
+/** Servicio de autenticación (API Express /api/auth). */
 export const authService = {
-  persistSession(token, user) {
-    if (!token || !user) return;
-    const normalized = normalizeUser(user);
-    try {
-      localStorage.setItem(TOKEN_KEY, token);
-      localStorage.setItem(USER_KEY, JSON.stringify(normalized));
-    } catch (e) {
-      console.error('No se pudo guardar la sesión en localStorage:', e);
-    }
-  },
-
-  getToken() {
-    try {
-      return localStorage.getItem(TOKEN_KEY);
-    } catch {
-      return null;
-    }
-  },
-
-  getUser() {
-    try {
-      const raw = localStorage.getItem(USER_KEY);
-      return raw ? normalizeUser(JSON.parse(raw)) : null;
-    } catch {
-      return null;
-    }
-  },
-
-  getCurrentUser() {
-    return this.getUser();
-  },
-
-  isAuthenticated() {
-    return Boolean(this.getToken() && this.getUser());
-  },
-
-  getAuthHeaders() {
-    const token = this.getToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  },
-
-  logout() {
-    try {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
-    } catch (error) {
-      console.error('No se pudo cerrar la sesión local:', error);
-    }
-  },
+  getToken: () => session.getToken(),
+  getUser: () => session.getUser(),
+  logout: () => session.clear(),
 
   async login({ email, password }) {
-    const response = await safeFetch(`${AUTH_URL}/login`, {
+    const result = await apiRequest('/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: { email, password },
+      fallbackMessage: 'No se pudo iniciar sesión.'
     });
-
-    const result = await readJson(response, 'No se pudo iniciar sesión.');
-    const normalized = normalizeUser(result.data.user);
-    this.persistSession(result.data.token, normalized);
-    return {
-      token: result.data.token,
-      user: normalized
-    };
+    return startSession(result);
   },
 
   async register({ nombre, email, password }) {
-    const response = await safeFetch(`${AUTH_URL}/register`, {
+    const result = await apiRequest('/auth/register', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre, email, password })
+      body: { nombre, email, password },
+      fallbackMessage: 'No se pudo crear la cuenta.'
     });
-
-    const result = await readJson(response, 'No se pudo crear la cuenta.');
-    const normalized = normalizeUser(result.data.user);
-    this.persistSession(result.data.token, normalized);
-    return {
-      token: result.data.token,
-      user: normalized
-    };
+    return startSession(result);
   },
 
   async me() {
-    const token = this.getToken();
-    if (!token) {
-      throw new Error('No hay una sesión activa.');
-    }
-
-    const response = await safeFetch(`${AUTH_URL}/me`, {
-      headers: {
-        ...this.getAuthHeaders()
-      }
+    const result = await apiRequest('/auth/me', {
+      auth: true,
+      fallbackMessage: 'No se pudo verificar la sesión.'
     });
+    const user = normalizeUser(result.data);
+    session.save(null, user);
+    return user;
+  },
 
-    const result = await readJson(response, 'No se pudo verificar la sesión.');
-    const normalized = normalizeUser(result.data);
-    this.persistSession(token, normalized);
-    return normalized;
+  async updateMe({ nombre, telefono, direccion }) {
+    const result = await apiRequest('/auth/me', {
+      method: 'PUT',
+      body: { nombre, telefono, direccion },
+      auth: true,
+      fallbackMessage: 'No se pudo actualizar el perfil.'
+    });
+    const user = normalizeUser(result.data);
+    session.save(null, user);
+    return user;
   }
 };
-
-// Limpieza única: versiones anteriores guardaban tokens "demo-..." que el backend nunca
-// aceptó. Si quedaron en el navegador, se descartan para que no simulen una sesión admin.
-try {
-  if ((localStorage.getItem(TOKEN_KEY) || '').startsWith('demo-')) {
-    authService.logout();
-  }
-} catch {
-  /* localStorage no disponible: nada que limpiar */
-}

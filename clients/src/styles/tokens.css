@@ -1,0 +1,143 @@
+/* ==========================================================================
+   Tokens de diseño — Hermanos Jota
+   Única fuente de color, tipografía, espaciado y forma. Ningún otro archivo
+   define colores en crudo: todos consumen estas variables.
+   ========================================================================== */
+
+:root {
+  /* ---- Paleta oficial de marca ---- */
+  --siena-tostado: #A0522D;
+  --verde-salvia: #87A96B;
+  --alabastro-calido: #F5E6D3;
+  --vara-de-oro: #D4A437;
+  --rosa-polvoriento: #C47A6D;
+
+  /* ---- Escalas derivadas (tintes y sombras de cada color) ---- */
+  --siena-50: #FBF3EE;
+  --siena-100: #F3E0D4;
+  --siena-600: var(--siena-tostado);
+  --siena-700: #874322;
+  --siena-900: #5C2B14;
+
+  --salvia-50: #F1F6EC;
+  --salvia-100: #E0EBD6;
+  --salvia-600: var(--verde-salvia);
+  --salvia-700: #557544;
+
+  --oro-50: #FCF6E6;
+  --oro-100: #F6E7BF;
+  --oro-600: var(--vara-de-oro);
+  --oro-700: #8A6512;
+
+  --rosa-50: #FAF0EE;
+  --rosa-100: #F2DCD7;
+  --rosa-600: var(--rosa-polvoriento);
+  --rosa-700: #9A4B3F;
+
+  --alabastro-50: #FDFAF6;
+  --alabastro-100: #FAF6F0;
+  --alabastro-200: var(--alabastro-calido);
+  --alabastro-300: #EBD7BE;
+
+  --tinta-900: #3D2B22;
+  --tinta-700: #5C514A;
+  --tinta-600: #6E6259;
+  --tinta-400: #9C8F84;
+
+  /* ---- Roles semánticos ---- */
+  --color-bg: #FAF8F5;
+  --color-bg-tint: var(--alabastro-100);
+  --color-surface: #FFFFFF;
+  --color-surface-muted: var(--alabastro-50);
+  --color-border: #E8DDCE;
+  --color-border-strong: #D9C8B3;
+  --color-text: var(--tinta-900);
+  --color-text-muted: var(--tinta-600);
+  --color-text-soft: var(--tinta-700);
+  --color-text-faint: var(--tinta-400);
+  --color-text-inverse: var(--alabastro-100);
+
+  --color-primary: var(--siena-600);
+  --color-primary-hover: var(--siena-700);
+  --color-primary-strong: var(--siena-900);
+  --color-primary-soft: var(--siena-50);
+  --color-primary-tint: var(--siena-100);
+
+  --color-success: var(--salvia-700);
+  --color-success-soft: var(--salvia-50);
+  --color-success-tint: var(--salvia-100);
+  --color-warning: var(--oro-700);
+  --color-warning-soft: var(--oro-50);
+  --color-warning-tint: var(--oro-100);
+  --color-danger: #A13D2B;
+  --color-danger-soft: var(--rosa-50);
+  --color-danger-tint: var(--rosa-100);
+  --color-info: var(--rosa-700);
+
+  --color-focus: var(--siena-600);
+  --color-overlay: rgba(44, 37, 35, .55);
+
+  /* ---- Tipografía (Manual de Marca: Playfair Display + Inter) ---- */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+
+  --text-2xs: .6875rem;  /* 11px — rótulos en versalitas */
+  --text-xs: .75rem;     /* 12px */
+  --text-sm: .8125rem;   /* 13px */
+  --text-base: .9375rem; /* 15px */
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: clamp(1.9rem, 3.4vw, 2.6rem);
+  --text-4xl: clamp(2.3rem, 5.4vw, 3.9rem);
+
+  --tracking-tight: .01em;
+  --tracking-wide: .08em;
+  --tracking-caps: .12em;
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-body: 1.6;
+
+  /* ---- Espaciado (escala de 4px) ---- */
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  /* ---- Forma ---- */
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  --shadow-xs: 0 1px 2px rgba(61, 43, 34, .05);
+  --shadow-sm: 0 2px 8px rgba(61, 43, 34, .06);
+  --shadow-md: 0 10px 28px rgba(61, 43, 34, .10);
+  --shadow-lg: 0 24px 60px rgba(61, 43, 34, .18);
+
+  /* ---- Layout ---- */
+  --container-max: 1200px;
+  --container-wide: 1320px;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --header-height: 72px;
+
+  /* ---- Movimiento ---- */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --duration-fast: 160ms;
+  --duration-base: 240ms;
+
+  /* ---- Capas ---- */
+  --z-header: 900;
+  --z-popover: 950;
+  --z-overlay: 1000;
+  --z-toast: 1100;
+}

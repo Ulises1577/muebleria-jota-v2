@@ -1,155 +1,85 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { AuthLayout } from '../components/AuthLayout';
+import { Alert, Button, Field, Input } from '../components/ui';
+import { useAuth } from '../context/AuthContext';
+import { useDocumentTitle } from '../hooks';
+import { ROUTES } from '../config/routes';
 
-const INITIAL_REGISTER = { nombre: '', email: '', password: '', confirmar: '' };
+const EMPTY = { nombre: '', email: '', password: '', confirmar: '' };
 
-export const RegisterPage = ({ onAuthSuccess }) => {
-  const [registerData, setRegisterData] = useState(INITIAL_REGISTER);
-  const [errors, setErrors] = useState({});
-  const [formError, setFormError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+export function RegisterPage() {
+  useDocumentTitle('Crear cuenta');
+  const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [data, setData] = useState(EMPTY);
+  const [errors, setErrors] = useState({});
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setRegisterData((prev) => ({ ...prev, [name]: value }));
+    setData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: null }));
-    setFormError('');
+    setError('');
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const nextErrors = {};
-
-    if (!registerData.nombre.trim()) nextErrors.nombre = 'Ingresá tu nombre.';
-    if (!registerData.email.trim()) {
-      nextErrors.email = 'Ingresá tu email.';
-    } else if (!/\S+@\S+\.\S+/.test(registerData.email)) {
-      nextErrors.email = 'Ingresá un correo electrónico válido.';
-    }
-    if (!registerData.password || registerData.password.length < 6) {
-      nextErrors.password = 'La contraseña debe tener al menos 6 caracteres.';
-    }
-    if (registerData.password !== registerData.confirmar) {
-      nextErrors.confirmar = 'Las contraseñas no coinciden.';
-    }
-
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors);
+    const next = {};
+    if (!data.nombre.trim()) next.nombre = 'Ingresá tu nombre.';
+    if (!data.email.trim()) next.email = 'Ingresá tu email.';
+    else if (!/\S+@\S+\.\S+/.test(data.email)) next.email = 'Ingresá un correo electrónico válido.';
+    if (data.password.length < 6) next.password = 'La contraseña debe tener al menos 6 caracteres.';
+    if (data.password !== data.confirmar) next.confirmar = 'Las contraseñas no coinciden.';
+    if (Object.keys(next).length) {
+      setErrors(next);
       return;
     }
 
-    setIsSubmitting(true);
-    setFormError('');
-
+    setSubmitting(true);
     try {
-      const session = await authService.register({
-        nombre: registerData.nombre,
-        email: registerData.email,
-        password: registerData.password
-      });
-      setSuccessMessage('¡Cuenta creada exitosamente! Redirigiendo…');
-      onAuthSuccess(session);
-      setTimeout(() => {
-        navigate('/', { replace: true });
-      }, 1200);
-    } catch (error) {
-      setFormError(error.message || 'No se pudo crear la cuenta.');
-    } finally {
-      setIsSubmitting(false);
+      await register({ nombre: data.nombre.trim(), email: data.email.trim(), password: data.password });
+      navigate(location.state?.from || ROUTES.home, { replace: true });
+    } catch (err) {
+      setError(err.message || 'No se pudo crear la cuenta.');
+      setSubmitting(false);
     }
   };
 
+  const field = (name, label, props = {}) => (
+    <Field label={label} htmlFor={`register-${name}`} error={errors[name]}>
+      <Input id={`register-${name}`} name={name} value={data[name]} onChange={handleChange} invalid={Boolean(errors[name])} {...props} />
+    </Field>
+  );
+
   return (
-    <div className="auth-page">
-      <div className="auth-page-card">
-        <h2>Crear Cuenta</h2>
-        <p className="auth-lead">
-          Registrate para acceder a todas las funcionalidades de nuestra tienda.
-        </p>
-
-        {successMessage && (
-          <div className="auth-success" role="status">
-            {successMessage}
-          </div>
-        )}
-
-        {formError && (
-          <div className="auth-alert" role="alert">
-            {formError}
-          </div>
-        )}
-
-        {!successMessage && (
-          <form className="auth-form" onSubmit={handleSubmit} noValidate>
-            <div className={`campo ${errors.nombre ? 'con-error' : ''}`}>
-              <label htmlFor="register-nombre">Nombre</label>
-              <input
-                id="register-nombre"
-                name="nombre"
-                type="text"
-                autoComplete="name"
-                value={registerData.nombre}
-                onChange={handleChange}
-              />
-              <span className="mensaje-error">{errors.nombre || ''}</span>
-            </div>
-            <div className={`campo ${errors.email ? 'con-error' : ''}`}>
-              <label htmlFor="register-email">Email</label>
-              <input
-                id="register-email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                value={registerData.email}
-                onChange={handleChange}
-              />
-              <span className="mensaje-error">{errors.email || ''}</span>
-            </div>
-            <div className={`campo ${errors.password ? 'con-error' : ''}`}>
-              <label htmlFor="register-password">Contraseña</label>
-              <input
-                id="register-password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                value={registerData.password}
-                onChange={handleChange}
-              />
-              <span className="mensaje-error">{errors.password || ''}</span>
-            </div>
-            <div className={`campo ${errors.confirmar ? 'con-error' : ''}`}>
-              <label htmlFor="register-confirmar">Confirmar contraseña</label>
-              <input
-                id="register-confirmar"
-                name="confirmar"
-                type="password"
-                autoComplete="new-password"
-                value={registerData.confirmar}
-                onChange={handleChange}
-              />
-              <span className="mensaje-error">{errors.confirmar || ''}</span>
-            </div>
-            <button
-              type="submit"
-              className="boton-enviar auth-submit"
-              disabled={isSubmitting}
-              style={{ width: '100%', marginTop: '0.5rem' }}
-            >
-              {isSubmitting ? 'Creando cuenta…' : 'Crear cuenta'}
-            </button>
-          </form>
-        )}
-
-        <p className="auth-hint" style={{ textAlign: 'center' }}>
+    <AuthLayout
+      eyebrow="Nueva cuenta"
+      title="Crear cuenta"
+      lead="Registrate para comprar y seguir el estado de tus pedidos."
+      footer={
+        <>
           ¿Ya tenés cuenta?{' '}
-          <Link to="/login" className="auth-link">
+          <Link to={ROUTES.login} state={location.state} className="text-link">
             Iniciar sesión
           </Link>
-        </p>
-      </div>
-    </div>
+        </>
+      }
+    >
+      {error && <Alert>{error}</Alert>}
+      <form className="form-grid" onSubmit={handleSubmit} noValidate>
+        {field('nombre', 'Nombre', { autoComplete: 'name' })}
+        {field('email', 'Email', { type: 'email', autoComplete: 'email' })}
+        <div className="form-grid form-grid--2">
+          {field('password', 'Contraseña', { type: 'password', autoComplete: 'new-password' })}
+          {field('confirmar', 'Confirmar', { type: 'password', autoComplete: 'new-password' })}
+        </div>
+        <Button type="submit" size="lg" block loading={submitting}>
+          {submitting ? 'Creando cuenta…' : 'Crear cuenta'}
+        </Button>
+      </form>
+    </AuthLayout>
   );
-};
+}
