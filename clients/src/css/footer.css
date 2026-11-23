@@ -17,7 +17,7 @@ main {
 /* Alabastro Cálido profundizado con 12 % de Siena (derivado de la paleta oficial) */
 :root { --footer-bg: color-mix(in srgb, #F5E6D3 88%, #A0522D 12%); }
 
-.site-footer { margin-top: auto; padding: 3.5rem 0 1.5rem; color: var(--color-text-secondary-strong, #5C514A); background: var(--footer-bg); border-top: 3px solid var(--siena-tostado); }
+.site-footer { margin-top: auto; padding: 3.5rem 0 1.5rem; color: var(--color-text-secondary-strong, #5C514A); background: var(--footer-bg); }
 .site-footer .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1.25rem; }
 .footer-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; margin-bottom: 3rem; }
 .footer-brand-title { margin: 0 0 .75rem; color: var(--siena-tostado-hover); font-family: 'Playfair Display', Georgia, serif; font-size: 1.5rem; letter-spacing: .02em; }

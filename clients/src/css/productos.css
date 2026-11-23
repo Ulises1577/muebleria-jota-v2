@@ -27,8 +27,10 @@
 
 .encabezado-catalogo h1 {
   margin-bottom: .75rem;
-  font-size: clamp(2.1rem, 5vw, 3.2rem);
+  font-size: clamp(2.3rem, 5.4vw, 3rem);
   line-height: 1.15;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .encabezado-catalogo p { color: var(--color-text-secondary); }

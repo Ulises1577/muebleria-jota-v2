@@ -42,6 +42,7 @@ html { scrollbar-color: rgba(160, 82, 45, .45) var(--alabastro-claro); }
   background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
   text-decoration: none;
   transition: background-size 260ms var(--ease-out), color 180ms var(--ease-out);
+  font-weight: 500;
 }
 .section-link:hover { color: var(--siena-tostado-hover); background-size: 100% 1px; }
 .section-link:focus-visible { outline: 2px solid var(--siena-tostado); outline-offset: 4px; border-radius: 2px; }

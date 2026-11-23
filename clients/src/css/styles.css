@@ -104,21 +104,11 @@ body {
   font-size: clamp(2.3rem, 5.4vw, 3.9rem);
   font-weight: 400;
   line-height: 1.1;
-  letter-spacing: .06em;
   text-align: center;
   text-transform: none;
   text-wrap: balance;
 }
 
-/* Filete Vara de Oro: único acento cálido del hero */
-.hero-content h1::after {
-  content: '';
-  display: block;
-  width: 56px;
-  height: 2px;
-  margin: 1.5rem auto 0;
-  background: var(--vara-de-oro);
-}
 
 .hero-content p {
   max-width: 560px;
@@ -146,12 +136,11 @@ body {
   justify-content: center;
   min-height: 48px;
   padding: .85rem 1.6rem;
-  color: #fff;
-  background: var(--siena-tostado);
-  border: 1px solid var(--siena-tostado);
+  color: var(--siena-tostado);
+  border: 1px solid var(--rosa-polvoriento);
   border-radius: .4rem;
   font-size: .8125rem;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: .08em;
   text-decoration: none;
   text-transform: uppercase;
@@ -160,12 +149,12 @@ body {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .home-button:hover { background: var(--siena-tostado-hover); border-color: var(--siena-tostado-hover); }
+  .home-button:hover { background: var(--siena-tostado-hover); border-color: var(--siena-tostado-hover); color: #fff;}
 }
 
 .home-button:active { transform: scale(.97); }
 
-.home-button--ghost { color: var(--siena-tostado-hover); background: transparent; border-color: rgba(160, 82, 45, .55); }
+.home-button--ghost { color: var(--siena-tostado-hover); background: transparent; border-color: var(--rosa-polvoriento); }
 
 @media (hover: hover) and (pointer: fine) {
   .home-button--ghost:hover { color: #fff; background: var(--siena-tostado); border-color: var(--siena-tostado); }
@@ -360,8 +349,9 @@ body {
 }
 
 .sostenibilidad__accent {
-  color: var(--gold-accent, #c5a059);
+  color: var(--verde-salvia-dark);
   font-family: "Playfair Display", Georgia, serif;
+  font-weight: 550;
 }
 
 .sostenibilidad__media img {
@@ -384,49 +374,141 @@ body {
   }
 }
 
-.history-section {
+/* ---------- Sección Mid-Century Modern ---------- */
+.mid-century-section {
+  width: 100%;
+  background-color: #F5EBE0;
+  padding: clamp(3.5rem, 6vw, 5.5rem) 0;
+}
+
+.mid-century-container {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
-  padding: 5rem 0;
+  align-items: center;
+  gap: clamp(2rem, 4vw, 3.5rem);
 }
 
-.history-copy {
-  max-width: 680px;
+@media (min-width: 768px) {
+  .mid-century-container {
+    grid-template-columns: 35fr 65fr;
+  }
 }
 
-.history-copy h2 {
-  margin: .35rem 0 1rem;
-  color: var(--siena-tostado);
+.mid-century-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.mid-century-title {
+  margin: 0 0 1rem;
+  color: var(--siena-tostado, #9E472A);
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(2rem, 4vw, 2.75rem);
-  line-height: 1.15;
-  text-transform: none;
+  font-size: clamp(1.85rem, 3.2vw, 2rem);
+  font-weight: 400;
+  line-height: 1.18;
   letter-spacing: 0;
+  text-transform: none;
+  text-wrap: balance;
+  white-space: nowrap;
 }
 
-.history-copy p {
-  color: var(--color-text-secondary);
+.mid-century-description {
+  margin: 0;
+  color: var(--color-text-secondary, #6E6259);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+  line-height: 1.65;
+  max-width: 38ch;
 }
 
-.history-highlight {
+.mid-century-button {
+  margin-top: clamp(1.5rem, 2.5vw, 2rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.85rem 1.85rem;
+  color: #FFFFFF;
+  background-color: var(--siena-tostado, #9E472A);
+  border: 1px solid var(--siena-tostado, #9E472A);
+  border-radius: 0.4rem;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 180ms var(--ease-out, ease-out),
+              border-color 180ms var(--ease-out, ease-out),
+              transform 160ms var(--ease-out, ease-out);
+}
+
+.mid-century-button:hover {
+  background-color: var(--siena-tostado-hover, #874322);
+  border-color: var(--siena-tostado-hover, #874322);
+  color: #FFFFFF;
+}
+
+.mid-century-button:active {
+  transform: scale(0.97);
+}
+
+.mid-century-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(18px, 2vw, 24px);
+  width: 100%;
+}
+
+.mid-century-img-wrap {
   position: relative;
-  align-self: center;
-  padding: 2rem;
-  color: var(--color-text-secondary);
-  background: linear-gradient(180deg, var(--alabastro-claro), var(--alabastro-calido));
-  border: 1px solid var(--color-border);
-  border-radius: .75rem;
-  box-shadow: var(--shadow-sm);
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 0;
+  background-color: #EFE4D6;
+  cursor: zoom-in;
 }
 
-.history-highlight strong {
+.mid-century-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
   display: block;
-  margin-bottom: .5rem;
-  color: var(--siena-tostado);
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.5rem;
-  font-weight: 600;
+  pointer-events: none;
+  will-change: transform, transform-origin;
+}
+
+@media (max-width: 767px) {
+  .mid-century-container {
+    grid-template-columns: 1fr;
+    gap: 2.25rem;
+  }
+
+  .mid-century-content {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .mid-century-description {
+    max-width: 100%;
+  }
+
+  .mid-century-gallery {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mid-century-gallery {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
 }
 
 .emotional-journey {
@@ -520,12 +602,6 @@ body {
 @media (min-width: 1024px) {
   .featured-products-grid {
     grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (min-width: 768px) {
-  .history-section {
-    grid-template-columns: 1.2fr .8fr;
   }
 }
 

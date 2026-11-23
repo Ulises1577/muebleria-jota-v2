@@ -1,6 +1,61 @@
 import React, { useEffect, useRef } from 'react';
 import Sostenibilidad from '../components/Sostenibilidad';
 
+function ZoomImage({ src, alt }) {
+  const imgRef = useRef(null);
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    if (imgRef.current) {
+      imgRef.current.style.transition = 'none';
+      imgRef.current.style.transformOrigin = `${x}% ${y}%`;
+      imgRef.current.style.transform = 'scale(3)';
+    }
+  };
+
+  const handleMouseEnter = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    if (imgRef.current) {
+      imgRef.current.style.transition = 'none';
+      imgRef.current.style.transformOrigin = `${x}% ${y}%`;
+      imgRef.current.style.transform = 'scale(3)';
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (imgRef.current) {
+      imgRef.current.style.transition = 'transform 0.25s ease-out';
+      imgRef.current.style.transformOrigin = 'center center';
+      imgRef.current.style.transform = 'scale(1)';
+    }
+  };
+
+  return (
+    <div
+      className="mid-century-img-wrap"
+      onMouseEnter={handleMouseEnter}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <img
+        ref={imgRef}
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        style={{
+          transformOrigin: 'center center',
+          transform: 'scale(1)'
+        }}
+      />
+    </div>
+  );
+}
+
 export const HomePage = ({ products = [], onSelectProduct, onNavigate, isAdmin = false }) => {
   // Destacados oficiales: IDs 1, 4, 7 y 8
   const destacadosIds = [1, 4, 7, 8];
@@ -37,7 +92,7 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate, isAdmin =
         <div className="home-container hero-content">
           <h1 id="hero-title">Clase que se siente al tacto</h1>
           <p>
-            Descubri la sensación de habitar Materiales de Verdad.
+            Descubri la sensación de habitar materiales de verdad.
           </p>
           <div className="hero-actions">
             <button
@@ -53,7 +108,7 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate, isAdmin =
                 className="home-button home-button--ghost"
                 onClick={() => onNavigate('contact')}
               >
-                Visitar el taller
+                Contanos tu idea
               </button>
             )}
           </div>
@@ -144,36 +199,42 @@ export const HomePage = ({ products = [], onSelectProduct, onNavigate, isAdmin =
       {/* Nueva sección Sostenibilidad */}
       <Sostenibilidad />
 
-      {/* Sección Historia Oficial */}
-      <section className="history-section home-container" aria-labelledby="history-title" data-reveal>
-        <div className="history-copy">
-          <span className="eyebrow">Nuestra historia</span>
-          <h2 id="history-title">Una tradición que sigue viva</h2>
-          <p>
-            En 1960, Juan José fundó en Buenos Aires una pequeña carpintería que llevaba su apellido y su pasión por el trabajo artesanal. Lo que comenzó como un modesto taller pronto se transformó en la reconocida mueblería Hermanos Jota.
-          </p>
-          <p>
-            Hoy, bajo la dirección de Carla —tercera generación comprometida con la tradición familiar— seguimos creando piezas que acompañan la vida cotidiana.
-          </p>
-        </div>
-        <aside className="history-highlight">
-          <strong>Diseño Mid-Century Modern</strong>
-          Líneas limpias, materiales nobles, funcionalidad clara y una estética atemporal guían cada mueble que sale de nuestra casa taller.
-        </aside>
-      </section>
-
-      {/* Cierre de la página */}
-      <section className="home-cta" aria-labelledby="cta-title" data-reveal>
-        <div className="home-container home-cta-inner">
-          <div>
-            <h2 id="cta-title">Las piezas se entienden en persona</h2>
-            <p>Visitá la casa taller en Av. San Juan 2847, San Cristóbal, y tocá la madera antes de elegir.</p>
+      {/* Sección Diseño Mid-Century Modern */}
+      <section className="mid-century-section" aria-labelledby="mid-century-title" data-reveal>
+        <div className="home-container mid-century-container">
+          <div className="mid-century-content">
+            <h2 id="mid-century-title" className="mid-century-title">
+              Diseño Mid-Century Modern
+            </h2>
+            <p className="mid-century-description">
+              Líneas limpias, materiales nobles, funcionalidad clara y una estética atemporal guían cada mueble que sale de nuestra casa taller.
+            </p>
+            <a
+              href="#contacto"
+              className="home-button mid-century-button"
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate?.('contact');
+              }}
+            >
+              CONTACTANOS
+            </a>
           </div>
-          {!isAdmin && (
-            <button type="button" className="home-button home-button--light" onClick={() => onNavigate('contact')}>
-              Visitar el taller
-            </button>
-          )}
+
+          <div className="mid-century-gallery" aria-label="Galería de detalles de mobiliario">
+            <ZoomImage
+              src="/assets/mid_century_1.jpg"
+              alt="Detalle de unión y tapizado en cuero de sillón artesanal"
+            />
+            <ZoomImage
+              src="/assets/mid_century_2.jpg"
+              alt="Detalle de estantería en madera noble y bronce"
+            />
+            <ZoomImage
+              src="/assets/mid_century_3.jpg"
+              alt="Detalle de respaldo tejido y apoyabrazos de madera"
+            />
+          </div>
         </div>
       </section>
     </div>

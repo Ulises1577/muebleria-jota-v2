@@ -132,8 +132,9 @@ header .header-actions .cart-button {
 .delete-modal h2 {
   font-family: 'Playfair Display', Georgia, serif;
   color: var(--siena-tostado);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
   margin: 0 0 8px;
 }
 
@@ -305,13 +306,14 @@ header .header-actions .cart-button {
   text-align: left;
   border-bottom: 1px solid var(--color-border);
   vertical-align: middle;
+  color: var(--siena-tostado);
 }
 
 .admin-table th {
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-text-secondary);
+  color: var(--siena-tostado);
   background: var(--alabastro-calido);
 }
 
@@ -325,7 +327,7 @@ header .header-actions .cart-button {
 
 .admin-product-name {
   display: block;
-  color: var(--color-text-main);
+  color: var(--siena-tostado);
 }
 
 .admin-product-category {
@@ -579,17 +581,26 @@ header .header-actions .cart-button {
 
 
 /* ===== Páginas independientes de Login y Registro ===== */
+body:has(.auth-page),
+#root:has(.auth-page) {
+  background-color: var(--alabastro-claro, #FAF6F0) !important;
+  background: var(--alabastro-claro, #FAF6F0) !important;
+}
+
 .auth-page {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 180px);
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  flex: 1 0 auto;
+  box-sizing: border-box;
   padding: 2rem 1rem;
-  background: linear-gradient(
-    135deg,
-    var(--alabastro-claro, #FAF6F0) 0%,
-    var(--alabastro-calido, #F5E6D3) 100%
-  );
+  background-color: var(--alabastro-claro, #FAF6F0);
+  background:
+    radial-gradient(ellipse 55% 70% at 50% 48%, rgba(250, 246, 240, .78) 0%, rgba(250, 246, 240, 0) 72%),
+    var(--alabastro-calido);
 }
 
 .auth-page-card {
@@ -600,14 +611,17 @@ header .header-actions .cart-button {
   background: var(--color-card-bg, #FFFFFF);
   border-radius: 4px;
   box-shadow: 0 24px 48px rgba(51, 37, 28, 0.15);
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .auth-page-card h2 {
   font-family: 'Playfair Display', Georgia, serif;
   color: var(--siena-tostado, #A0522D);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
+  text-transform: none;
   margin: 0 0 8px;
+  font-weight: 600;
 }
 
 .auth-page-card .auth-lead {
