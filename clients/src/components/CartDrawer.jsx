@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useCatalog } from '../context/CatalogContext';
 import { useToast } from '../context/ToastContext';
 import { orderService } from '../services/orderService';
+import { session } from '../services/session';
 import { ROUTES } from '../config/routes';
 import { COMMERCE } from '../config/site';
 import { formatCurrency, pluralize, shortId } from '../utils/format';
@@ -16,6 +17,13 @@ const emptyShipping = (user) => ({
   telefono: user?.telefono || '',
   notas: ''
 });
+
+/** Clave única por intento de compra: si el mismo pedido se reenvía, el backend no lo duplica. */
+const newIdempotencyKey = () =>
+  globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+
+/** Firma del contenido del carrito: si cambia, el siguiente envío es una compra distinta. */
+const cartSignature = (items) => items.map((item) => `${getProductId(item)}:${item.quantity}`).join('|');
 
 export function CartDrawer() {
   const cart = useCart();
@@ -30,6 +38,9 @@ export function CartDrawer() {
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  // El ref bloquea un segundo envío en el mismo instante (antes de que React re-renderice el botón)
+  const submittingRef = useRef(false);
+  const attemptRef = useRef({ signature: '', key: '' });
 
   useEffect(() => {
     if (cart.isOpen) {
@@ -45,6 +56,18 @@ export function CartDrawer() {
     navigate(ROUTES.login, { state: { from: location.pathname, reason: 'checkout' } });
   };
 
+  // Comprar exige sesión: usuario en el contexto y un JWT guardado para enviarlo al backend
+  const hasSession = () => Boolean(user && session.getToken());
+
+  const startCheckout = () => {
+    if (!hasSession()) {
+      notify('Iniciá sesión para finalizar tu compra.', 'info');
+      goToLogin();
+      return;
+    }
+    setStep('checkout');
+  };
+
   const handleShippingChange = (event) => {
     const { name, value } = event.target;
     setShipping((prev) => ({ ...prev, [name]: value }));
@@ -53,6 +76,14 @@ export function CartDrawer() {
 
   const handleConfirm = async (event) => {
     event.preventDefault();
+    if (submittingRef.current) return;
+
+    if (!hasSession()) {
+      notify('Tu sesión no está activa. Iniciá sesión para finalizar la compra.', 'info');
+      goToLogin();
+      return;
+    }
+
     const nextErrors = {};
     if (!shipping.direccion.trim()) nextErrors.direccion = 'Indicá la dirección de entrega.';
     if (!shipping.telefono.trim()) nextErrors.telefono = 'Dejanos un teléfono para coordinar el envío.';
@@ -61,17 +92,26 @@ export function CartDrawer() {
       return;
     }
 
+    // Se reutiliza la clave mientras el carrito no cambie (reintentos del mismo pedido)
+    const signature = cartSignature(cart.items);
+    if (attemptRef.current.signature !== signature || !attemptRef.current.key) {
+      attemptRef.current = { signature, key: newIdempotencyKey() };
+    }
+
+    submittingRef.current = true;
     setSubmitting(true);
     setSubmitError('');
     try {
-      const order = await orderService.createOrder({
+      const { order, duplicated } = await orderService.createOrder({
         items: cart.items,
+        idempotencyKey: attemptRef.current.key,
         datosEnvio: {
           direccion: shipping.direccion.trim(),
           telefono: shipping.telefono.trim(),
           notas: shipping.notas.trim()
         }
       });
+      attemptRef.current = { signature: '', key: '' };
       cart.clear();
       cart.close();
       // Si la cuenta todavía no tenía datos de entrega, se guardan para la próxima compra
@@ -83,12 +123,24 @@ export function CartDrawer() {
         }).catch(() => {});
       }
       reload().catch(() => {});
-      notify(`Pedido #${shortId(order?._id)} confirmado. El taller te contactará para coordinar la entrega.`);
+      notify(
+        duplicated
+          ? `Tu pedido #${shortId(order?._id)} ya estaba registrado; no se generó una compra duplicada.`
+          : `Pedido #${shortId(order?._id)} confirmado. El taller te contactará para coordinar la entrega.`
+      );
     } catch (error) {
+      if (error.status === 401) {
+        // Token inválido o vencido: el backend rechazó la compra. apiRequest avisa a AuthContext, que
+        // cierra la sesión y lleva al login; el carrito queda guardado para retomar la compra después.
+        cart.close();
+        notify('Tu sesión expiró o no es válida. Iniciá sesión nuevamente para finalizar la compra.', 'danger');
+        return;
+      }
       setSubmitError(error.message);
       // Si el problema fue el stock, se refresca el catálogo para mostrar las unidades reales
       if (error.status === 409) reload().catch(() => {});
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   };
@@ -107,7 +159,7 @@ export function CartDrawer() {
           Vaciar
         </Button>
         {user ? (
-          <Button onClick={() => setStep('checkout')} iconRight="arrow-right">
+          <Button onClick={startCheckout} iconRight="arrow-right">
             Finalizar compra
           </Button>
         ) : (

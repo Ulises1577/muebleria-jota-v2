@@ -138,6 +138,62 @@ export const ProductModel = {
     return fallbackProducts[index];
   },
 
+  /**
+   * Descuenta unidades de forma atómica: solo lo hace si hay stock suficiente.
+   * Devuelve el producto actualizado, o null si no existe o no alcanza el stock.
+   * Así dos compras simultáneas no pueden vender la misma unidad.
+   */
+  async decrementStock(id, cantidad) {
+    if (mongoose.connection.readyState === 1) {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return null;
+      }
+
+      return Product.findOneAndUpdate(
+        { _id: id, stock: { $gte: cantidad } },
+        { $inc: { stock: -cantidad } },
+        { new: true }
+      ).lean();
+    }
+
+    const index = fallbackProducts.findIndex((product) => Number(product.id) === Number(id) || String(product._id) === String(id));
+    if (index === -1 || Number(fallbackProducts[index].stock ?? 0) < cantidad) {
+      return null;
+    }
+
+    fallbackProducts[index] = {
+      ...fallbackProducts[index],
+      stock: Number(fallbackProducts[index].stock ?? 0) - cantidad,
+      updatedAt: new Date().toISOString()
+    };
+
+    return fallbackProducts[index];
+  },
+
+  /** Devuelve unidades al inventario (se usa para revertir una compra que no se pudo registrar). */
+  async incrementStock(id, cantidad) {
+    if (mongoose.connection.readyState === 1) {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return null;
+      }
+
+      return Product.findByIdAndUpdate(id, { $inc: { stock: cantidad } }, { new: true }).lean();
+    }
+
+    const index = fallbackProducts.findIndex((product) => Number(product.id) === Number(id) || String(product._id) === String(id));
+    if (index === -1) {
+      return null;
+    }
+
+    fallbackProducts[index] = {
+      ...fallbackProducts[index],
+      stock: Number(fallbackProducts[index].stock ?? 0) + cantidad,
+      updatedAt: new Date().toISOString()
+    };
+
+    return fallbackProducts[index];
+  },
+
   async deleteById(id) {
     if (mongoose.connection.readyState === 1) {
       if (!mongoose.Types.ObjectId.isValid(id)) {

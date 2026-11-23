@@ -10,22 +10,16 @@ const router = Router();
  *   schemas:
  *     OrderItem:
  *       type: object
+ *       description: Nombre, precio e imagen se toman del catálogo en el servidor; el cliente solo indica producto y cantidad.
  *       required:
  *         - productoId
- *         - nombre
- *         - precio
  *         - cantidad
  *       properties:
  *         productoId:
  *           type: string
- *         nombre:
- *           type: string
- *         precio:
- *           type: number
  *         cantidad:
  *           type: integer
- *         imagenUrl:
- *           type: string
+ *           minimum: 1
  *     OrderInput:
  *       type: object
  *       required:
@@ -35,8 +29,6 @@ const router = Router();
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/OrderItem'
- *         total:
- *           type: number
  *         datosEnvio:
  *           type: object
  *           properties:
@@ -52,10 +44,18 @@ const router = Router();
  * @swagger
  * /api/pedidos:
  *   post:
- *     summary: Crear un nuevo pedido
+ *     summary: Crear un nuevo pedido (finalizar compra)
+ *     description: El pedido se asocia al usuario del JWT. El total se calcula en el servidor con los precios del catálogo.
  *     tags: [Pedidos]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Idempotency-Key
+ *         required: false
+ *         description: Clave única por intento de compra (8-100 caracteres alfanuméricos, - o _). Si se repite, se devuelve el pedido ya creado.
+ *         schema:
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -65,10 +65,14 @@ const router = Router();
  *     responses:
  *       201:
  *         description: Pedido creado exitosamente
+ *       200:
+ *         description: El pedido con esa Idempotency-Key ya existía; se devuelve sin duplicarlo
  *       400:
- *         description: Datos inválidos
+ *         description: Datos inválidos (sin productos, producto inexistente o cantidad no entera)
  *       401:
- *         description: No autenticado
+ *         description: Token ausente, inválido o vencido
+ *       409:
+ *         description: Stock insuficiente
  */
 router.post('/', verifyToken, (req, res, next) => OrderController.createOrder(req, res, next));
 

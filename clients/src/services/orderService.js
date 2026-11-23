@@ -2,23 +2,26 @@ import { apiRequest } from './apiClient';
 
 /** Servicio de pedidos (API Express /api/pedidos). */
 export const orderService = {
-  async createOrder({ items, datosEnvio }) {
+  /**
+   * Finaliza la compra. Requiere sesión: el JWT viaja en Authorization: Bearer (auth: true).
+   * Solo se envían producto y cantidad; precios y total los calcula el backend.
+   * `idempotencyKey` identifica el intento de compra para que un reenvío no duplique el pedido.
+   */
+  async createOrder({ items, datosEnvio, idempotencyKey }) {
     const result = await apiRequest('/pedidos', {
       method: 'POST',
       auth: true,
+      headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined,
       body: {
         items: items.map((item) => ({
           productoId: item._id ?? item.id,
-          nombre: item.nombre,
-          precio: Number(item.precio),
-          cantidad: Number(item.quantity),
-          imagenUrl: item.imagenUrl || item.imagen || ''
+          cantidad: Number(item.quantity)
         })),
         datosEnvio
       },
       fallbackMessage: 'No se pudo registrar el pedido.'
     });
-    return result.data;
+    return { order: result.data, duplicated: Boolean(result.duplicated) };
   },
 
   async getMyOrders() {

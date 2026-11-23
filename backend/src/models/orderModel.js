@@ -30,7 +30,9 @@ const orderSchema = new mongoose.Schema(
       direccion: { type: String, default: '' },
       telefono: { type: String, default: '' },
       notas: { type: String, default: '' }
-    }
+    },
+    // Clave que envía el front por cada intento de compra: evita registrar dos veces el mismo pedido
+    idempotencyKey: { type: String }
   },
   {
     timestamps: true,
@@ -38,9 +40,15 @@ const orderSchema = new mongoose.Schema(
   }
 );
 
+orderSchema.index(
+  { usuarioId: 1, idempotencyKey: 1 },
+  { unique: true, partialFilterExpression: { idempotencyKey: { $type: 'string' } } }
+);
+
 export const Order = mongoose.model('Order', orderSchema);
 
 const fallbackOrders = [];
+let fallbackSequence = 0;
 
 export const ORDER_STATUSES = ['pendiente', 'confirmado', 'enviado', 'entregado'];
 
@@ -51,8 +59,21 @@ export const OrderModel = {
       return order.toObject();
     }
 
+    if (orderData.idempotencyKey) {
+      const duplicated = fallbackOrders.some(
+        (order) => String(order.usuarioId) === String(orderData.usuarioId)
+          && order.idempotencyKey === orderData.idempotencyKey
+      );
+      if (duplicated) {
+        const error = new Error('El pedido ya fue registrado.');
+        error.code = 11000; // Simular error de duplicado de MongoDB
+        throw error;
+      }
+    }
+
+    fallbackSequence += 1;
     const newOrder = {
-      _id: `order-${Date.now()}`,
+      _id: `order-${Date.now()}-${fallbackSequence}`,
       usuarioId: String(orderData.usuarioId),
       usuarioEmail: orderData.usuarioEmail,
       items: orderData.items,
@@ -63,6 +84,7 @@ export const OrderModel = {
         telefono: orderData.datosEnvio?.telefono || '',
         notas: orderData.datosEnvio?.notas || ''
       },
+      ...(orderData.idempotencyKey && { idempotencyKey: orderData.idempotencyKey }),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -81,6 +103,17 @@ export const OrderModel = {
     return fallbackOrders
       .filter((order) => String(order.usuarioId) === String(userId))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  },
+
+  /** Busca el pedido que un usuario ya registró con esa clave de idempotencia. */
+  async findByIdempotencyKey(userId, idempotencyKey) {
+    if (mongoose.connection.readyState === 1) {
+      return Order.findOne({ usuarioId: userId, idempotencyKey }).lean();
+    }
+
+    return fallbackOrders.find(
+      (order) => String(order.usuarioId) === String(userId) && order.idempotencyKey === idempotencyKey
+    ) || null;
   },
 
   async findById(id) {

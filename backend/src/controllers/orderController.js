@@ -1,16 +1,45 @@
 import { OrderModel, ORDER_STATUSES } from '../models/orderModel.js';
 import { ProductModel } from '../models/productModel.js';
 
+// Formato aceptado para el header Idempotency-Key (ej. un UUID generado por el front)
+const IDEMPOTENCY_KEY_PATTERN = /^[A-Za-z0-9_-]{8,100}$/;
+
 export const OrderController = {
   /**
    * POST /api/pedidos
-   * Crea un nuevo pedido asociado al usuario autenticado (extraído del JWT).
+   * Crea un nuevo pedido asociado al usuario autenticado (extraído del JWT, nunca del body).
+   * Nombre, precio y total se toman del catálogo: el front solo indica qué productos y cuántos.
+   * Header opcional "Idempotency-Key": si se repite, devuelve el pedido ya creado en lugar de duplicarlo.
    */
   async createOrder(req, res, next) {
     try {
-      const { items, total, datosEnvio } = req.body || {};
+      const { items, datosEnvio } = req.body || {};
+      const usuarioId = req.user.id;
 
-      // 1. Validar que vengan items y sea un arreglo no vacío
+      // 1. Validar la clave de idempotencia (opcional)
+      const rawKey = req.get('Idempotency-Key');
+      const idempotencyKey = rawKey ? String(rawKey).trim() : '';
+      if (idempotencyKey && !IDEMPOTENCY_KEY_PATTERN.test(idempotencyKey)) {
+        return res.status(400).json({
+          success: false,
+          message: 'La clave de idempotencia no es válida.'
+        });
+      }
+
+      // 2. Si este intento de compra ya se registró (doble clic, reintento por corte de red), no se duplica
+      if (idempotencyKey) {
+        const existing = await OrderModel.findByIdempotencyKey(usuarioId, idempotencyKey);
+        if (existing) {
+          return res.status(200).json({
+            success: true,
+            duplicated: true,
+            message: 'Este pedido ya había sido registrado.',
+            data: existing
+          });
+        }
+      }
+
+      // 3. Validar que vengan items y sea un arreglo no vacío
       if (!Array.isArray(items) || items.length === 0) {
         return res.status(400).json({
           success: false,
@@ -18,90 +47,114 @@ export const OrderController = {
         });
       }
 
-      // 2. Validar estructura de cada item y calcular el total
-      let calculatedTotal = 0;
-      const formattedItems = [];
-
+      // 4. Validar cada línea y agrupar por producto (una misma pieza repetida suma cantidades)
+      const quantities = new Map();
       for (const item of items) {
-        const productoId = item.productoId || item._id || item.id;
-        const nombre = item.nombre;
-        const precio = Number(item.precio);
-        const cantidad = Number(item.cantidad || item.quantity || 1);
+        const productoId = item?.productoId ?? item?._id ?? item?.id;
+        const cantidad = Number(item?.cantidad ?? item?.quantity);
 
-        if (!productoId || !nombre) {
+        if (productoId === undefined || productoId === null || String(productoId).trim() === '') {
           return res.status(400).json({
             success: false,
-            message: 'Cada producto debe tener un ID y un nombre válido.'
+            message: 'Cada producto del pedido debe tener un ID válido.'
           });
         }
 
-        if (Number.isNaN(precio) || precio < 0) {
+        if (!Number.isInteger(cantidad) || cantidad < 1) {
           return res.status(400).json({
             success: false,
-            message: `El precio del producto "${nombre}" no es válido.`
+            message: 'La cantidad de cada producto debe ser un número entero de al menos 1 unidad.'
           });
         }
 
-        if (Number.isNaN(cantidad) || cantidad < 1) {
-          return res.status(400).json({
-            success: false,
-            message: `La cantidad del producto "${nombre}" debe ser de al menos 1 unidad.`
-          });
-        }
-
-        calculatedTotal += precio * cantidad;
-
-        formattedItems.push({
-          productoId: String(productoId),
-          nombre: String(nombre).trim(),
-          precio,
-          cantidad,
-          imagenUrl: item.imagenUrl || item.imagen || ''
-        });
+        const key = String(productoId).trim();
+        quantities.set(key, (quantities.get(key) || 0) + cantidad);
       }
 
-      // 2b. Validar stock disponible antes de confirmar (solo productos que existen en el catálogo)
-      const stockUpdates = [];
-      for (const item of formattedItems) {
-        const product = await ProductModel.getById(item.productoId);
-        if (!product) continue;
+      // 5. Verificar contra el catálogo real: existencia, precio vigente y stock
+      const formattedItems = [];
+      for (const [productoId, cantidad] of quantities) {
+        const product = await ProductModel.getById(productoId);
+        if (!product) {
+          return res.status(400).json({
+            success: false,
+            message: 'Uno de los productos del carrito ya no está disponible en el catálogo.'
+          });
+        }
 
         const available = Number(product.stock ?? 0);
-        if (available < item.cantidad) {
+        if (available < cantidad) {
           return res.status(409).json({
             success: false,
             message: available > 0
-              ? `Solo quedan ${available} unidad(es) de "${item.nombre}".`
-              : `"${item.nombre}" está sin stock en este momento.`
+              ? `Solo quedan ${available} unidad(es) de "${product.nombre}".`
+              : `"${product.nombre}" está sin stock en este momento.`
           });
         }
 
-        stockUpdates.push({ id: product._id ?? product.id, stock: available - item.cantidad });
+        formattedItems.push({
+          productoId: String(product._id ?? product.id),
+          nombre: product.nombre,
+          precio: Number(product.precio),
+          cantidad,
+          imagenUrl: product.imagenUrl || product.imagen || ''
+        });
       }
 
-      // El total final es el calculado a partir de los items
-      const finalTotal = total !== undefined && !Number.isNaN(Number(total)) && Number(total) >= 0
-        ? Number(total)
-        : calculatedTotal;
+      // 6. Reservar stock de forma atómica; si alguna pieza se agotó mientras tanto, se revierte todo
+      const reserved = [];
+      const releaseStock = () => Promise.all(
+        reserved.map(({ productoId, cantidad }) => ProductModel.incrementStock(productoId, cantidad))
+      );
 
-      // 3. Crear el pedido asociándolo al usuario del token (req.user)
+      for (const item of formattedItems) {
+        const updated = await ProductModel.decrementStock(item.productoId, item.cantidad);
+        if (!updated) {
+          await releaseStock();
+          return res.status(409).json({
+            success: false,
+            message: `"${item.nombre}" ya no tiene stock suficiente. Actualizá tu carrito e intentá de nuevo.`
+          });
+        }
+        reserved.push(item);
+      }
+
+      // 7. Crear el pedido asociado al usuario del token (req.user), con el total calculado en el servidor
+      const total = formattedItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
       const orderData = {
-        usuarioId: req.user.id,
+        usuarioId,
         usuarioEmail: req.user.email,
         items: formattedItems,
-        total: finalTotal,
+        total,
         estado: 'confirmado',
         datosEnvio: {
-          direccion: datosEnvio?.direccion || '',
-          telefono: datosEnvio?.telefono || '',
-          notas: datosEnvio?.notas || ''
-        }
+          direccion: String(datosEnvio?.direccion ?? '').trim(),
+          telefono: String(datosEnvio?.telefono ?? '').trim(),
+          notas: String(datosEnvio?.notas ?? '').trim()
+        },
+        ...(idempotencyKey && { idempotencyKey })
       };
 
-      const newOrder = await OrderModel.create(orderData);
+      let newOrder;
+      try {
+        newOrder = await OrderModel.create(orderData);
+      } catch (error) {
+        await releaseStock();
 
-      // 4. Descontar del inventario las unidades vendidas
-      await Promise.all(stockUpdates.map(({ id, stock }) => ProductModel.updateById(id, { stock })));
+        // Dos envíos simultáneos con la misma clave: el segundo devuelve el pedido del primero
+        if (error.code === 11000 && idempotencyKey) {
+          const existing = await OrderModel.findByIdempotencyKey(usuarioId, idempotencyKey);
+          if (existing) {
+            return res.status(200).json({
+              success: true,
+              duplicated: true,
+              message: 'Este pedido ya había sido registrado.',
+              data: existing
+            });
+          }
+        }
+        throw error;
+      }
 
       return res.status(201).json({
         success: true,
