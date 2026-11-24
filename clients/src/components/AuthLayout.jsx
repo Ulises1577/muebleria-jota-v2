@@ -22,7 +22,7 @@ export function AuthLayout({ eyebrow, title, lead, children, footer }) {
             Desde {BRAND.foundedYear} · {WORKSHOP.label} en {WORKSHOP.neighborhood}
           </span>
         </div>
-        <img src="/assets/sillon_copacabana_hero.png" alt="" className="auth__image" />
+        <img src="/assets/living_mid_century.jpg" alt="" className="auth__image" decoding="async" />
       </aside>
 
       <main className="auth__panel">
