@@ -77,7 +77,10 @@
   --color-focus: var(--siena-600);
   --color-overlay: rgba(44, 37, 35, .55);
 
-  /* ---- Tipografía (Manual de Marca: Playfair Display + Inter) ---- */
+  /* ---- Tipografía (Manual de Marca) ----
+     Inter (primaria, cuerpo y UI): 300 leyendas y secundarios · 400 texto · 500 énfasis y rótulos · 700 títulos y CTAs
+     Playfair Display (secundaria, títulos editoriales): 400 títulos elegantes · 700 énfasis editorial
+     Solo se cargan esos pesos (ver index.html); no usar otros ni itálicas. */
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
 
