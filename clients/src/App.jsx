@@ -29,15 +29,16 @@ export function App() {
             <Routes>
               <Route path={ROUTES.login} element={<GuestOnly><LoginPage /></GuestOnly>} />
               <Route path={ROUTES.register} element={<GuestOnly><RegisterPage /></GuestOnly>} />
-
-              <Route element={<SiteLayout />}>
+                  
+               <Route element={<SiteLayout />}>
                 <Route index element={<HomePage />} />
                 <Route path={ROUTES.catalog} element={<CatalogPage />} />
+                <Route path="/catalogo" element={<Navigate to={ROUTES.catalog} replace />} />
                 <Route path="/productos/:id" element={<DetailPage />} />
                 <Route path={ROUTES.contact} element={<CustomerOnly><ContactPage /></CustomerOnly>} />
                 <Route path={ROUTES.profile} element={<RequireAuth><UserProfilePage /></RequireAuth>} />
                 <Route path="*" element={<NotFoundPage />} />
-              </Route>
+              </Route>          
 
               <Route path={ROUTES.admin} element={<AdminLayout />}>
                 <Route index element={<AdminProductsPage />} />
