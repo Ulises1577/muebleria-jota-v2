@@ -35,6 +35,36 @@ function useScrollReveal() {
   return ref;
 }
 
+/** Foto de la galería Mid-Century: al pasar el mouse se amplía siguiendo el cursor. */
+function ZoomImage({ src, alt }) {
+  const imgRef = useRef(null);
+
+  const zoomAt = (event) => {
+    const img = imgRef.current;
+    if (!img) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    img.style.transition = 'none';
+    img.style.transformOrigin = `${x}% ${y}%`;
+    img.style.transform = 'scale(3)';
+  };
+
+  const resetZoom = () => {
+    const img = imgRef.current;
+    if (!img) return;
+    img.style.transition = 'transform 0.25s ease-out';
+    img.style.transformOrigin = 'center center';
+    img.style.transform = 'scale(1)';
+  };
+
+  return (
+    <div className="mid-century__img" onMouseEnter={zoomAt} onMouseMove={zoomAt} onMouseLeave={resetZoom}>
+      <img ref={imgRef} src={src} alt={alt} loading="lazy" decoding="async" />
+    </div>
+  );
+}
+
 export function HomePage() {
   useDocumentTitle(null);
   const { products, isLoading } = useCatalog();
@@ -59,7 +89,7 @@ export function HomePage() {
             </Link>
             {!isAdmin && (
               <Link to={ROUTES.contact} className="btn btn--outline btn--lg">
-                <span>Visitar el taller</span>
+                <span>Contanos tu idea</span>
               </Link>
             )}
           </div>
@@ -97,35 +127,25 @@ export function HomePage() {
 
       <Sostenibilidad />
 
-      <section className="container history" aria-labelledby="history-title" data-reveal>
-        <div className="history__copy">
-          <Eyebrow>Nuestra historia</Eyebrow>
-          <h2 id="history-title" className="display-title">Una tradición que sigue viva</h2>
-          <p>
-            En {BRAND.foundedYear}, Juan José fundó en Buenos Aires una pequeña carpintería que llevaba su apellido y su pasión por el
-            trabajo artesanal. Lo que comenzó como un modesto taller pronto se transformó en la reconocida mueblería {BRAND.name}.
-          </p>
-          <p>Hoy, bajo la dirección de Carla —tercera generación comprometida con la tradición familiar— seguimos creando piezas que acompañan la vida cotidiana.</p>
-        </div>
-        <aside className="history__highlight">
-          <strong>{BRAND.style}</strong>
-          Líneas limpias, materiales nobles, funcionalidad clara y una estética atemporal guían cada mueble que sale de nuestra casa taller.
-        </aside>
-      </section>
-
-      <section className="home-cta" aria-labelledby="cta-title" data-reveal>
-        <div className="container home-cta__inner">
-          <div>
-            <h2 id="cta-title">Las piezas se entienden en persona</h2>
-            <p>
-              Visitá la casa taller en {WORKSHOP.street}, {WORKSHOP.neighborhood}, y tocá la madera antes de elegir.
+      <section className="mid-century" aria-labelledby="mid-century-title" data-reveal>
+        <div className="container mid-century__inner">
+          <div className="mid-century__copy">
+            <h2 id="mid-century-title" className="mid-century__title">{BRAND.style}</h2>
+            <p className="mid-century__text">
+              Líneas limpias, materiales nobles, funcionalidad clara y una estética atemporal guían cada mueble que sale de nuestra casa taller.
             </p>
+            {!isAdmin && (
+              <Link to={ROUTES.contact} className="btn btn--primary btn--lg">
+                <span>Contactanos</span>
+              </Link>
+            )}
           </div>
-          {!isAdmin && (
-            <Link to={ROUTES.contact} className="btn btn--light btn--lg">
-              <span>Visitar el taller</span>
-            </Link>
-          )}
+
+          <div className="mid-century__gallery" aria-label="Galería de detalles de mobiliario">
+            <ZoomImage src="/assets/mid_century_1.jpg" alt="Detalle de unión y tapizado en cuero de sillón artesanal" />
+            <ZoomImage src="/assets/mid_century_2.jpg" alt="Detalle de estantería en madera noble y bronce" />
+            <ZoomImage src="/assets/mid_century_3.jpg" alt="Detalle de respaldo tejido y apoyabrazos de madera" />
+          </div>
         </div>
       </section>
     </div>
