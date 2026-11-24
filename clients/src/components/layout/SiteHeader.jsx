@@ -95,12 +95,8 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <div className={`container ${isAdmin ? 'container--wide' : ''} site-header__inner`}>
-        <Link to={isAdmin ? ROUTES.admin : ROUTES.home} className="brand" aria-label={`${BRAND.name}, ir al inicio`}>
-          <img src={BRAND.logo} alt="" className="brand__logo" />
-          <span className="brand__text">
-            <span className="brand__name">{BRAND.name}</span>
-            <span className="brand__tagline">{isAdmin ? 'Panel del taller' : BRAND.tagline}</span>
-          </span>
+        <Link to={ROUTES.home} className="brand" aria-label={`${BRAND.name}, ir al inicio`}>
+          <img src={BRAND.logo} alt={BRAND.name} className="brand__logo" />
         </Link>
 
         <nav className={`main-nav ${navOpen ? 'is-open' : ''}`} id="main-navigation" aria-label="Navegación principal">
