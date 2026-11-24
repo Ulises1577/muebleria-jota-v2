@@ -23,11 +23,8 @@
   min-height: var(--header-height);
 }
 
-.brand { display: inline-flex; flex: none; align-items: center; gap: var(--space-3); }
-.brand__logo { width: 40px; height: 40px; object-fit: contain; }
-.brand__text { display: flex; flex-direction: column; line-height: 1.05; }
-.brand__name { color: var(--color-primary); font-family: var(--font-serif); font-size: 1.125rem; font-weight: 700; letter-spacing: .01em; }
-.brand__tagline { margin-top: 3px; color: var(--color-text-muted); font-size: .5625rem; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; }
+.brand { display: inline-flex; flex: none; align-items: center; }
+.brand__logo { width: auto; height: 36px; max-height: 40px; object-fit: contain; display: block; }
 
 .main-nav { flex: 1; }
 .main-nav__list { display: flex; align-items: center; justify-content: center; gap: clamp(1rem, 2.2vw, 2rem); }
@@ -170,10 +167,6 @@
   .main-nav__link { display: block; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border); }
   .main-nav__link::after { display: none; }
   .user-menu__name { display: none; }
-}
-
-@media (max-width: 480px) {
-  .brand__text { display: none; }
 }
 
 /* ---------- Pie de página ---------- */

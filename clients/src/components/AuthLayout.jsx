@@ -10,11 +10,7 @@ export function AuthLayout({ eyebrow, title, lead, children, footer }) {
     <div className="auth">
       <aside className="auth__brand">
         <Link to={ROUTES.home} className="brand brand--inverse" aria-label={`${BRAND.name}, volver al inicio`}>
-          <img src={BRAND.logo} alt="" className="brand__logo" />
-          <span className="brand__text">
-            <span className="brand__name">{BRAND.name}</span>
-            <span className="brand__tagline">{BRAND.tagline}</span>
-          </span>
+          <img src={BRAND.logo} alt={BRAND.name} className="brand__logo" />
         </Link>
         <div className="auth__quote">
           <p>Clase que se siente al tacto.</p>

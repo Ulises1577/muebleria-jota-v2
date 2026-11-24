@@ -28,9 +28,14 @@
 }
 .auth__brand > .brand { position: relative; z-index: 2; }
 @media (min-width: 960px) { .auth__brand { display: flex; } }
-.brand--inverse .brand__name { color: var(--alabastro-100); }
-.brand--inverse .brand__tagline { color: rgba(250, 246, 240, .75); }
-.brand--inverse .brand__logo { padding: 4px; background: var(--alabastro-100); border-radius: var(--radius-sm); }
+.brand--inverse .brand__logo {
+  width: auto;
+  height: 40px;
+  filter: brightness(0) invert(1);
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
 .auth__quote { position: relative; z-index: 2; max-width: 18ch; text-shadow: 0 2px 18px rgba(44, 25, 15, .35); }
 .auth__quote p { font-family: var(--font-serif); font-size: clamp(2rem, 3vw, 2.75rem); line-height: 1.1; }
 .auth__quote span { display: block; margin-top: var(--space-4); font-size: var(--text-2xs); font-weight: 500; letter-spacing: var(--tracking-caps); text-transform: uppercase; opacity: .8; }
