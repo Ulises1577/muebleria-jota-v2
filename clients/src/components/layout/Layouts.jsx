@@ -52,12 +52,9 @@ export function AdminLayout() {
   );
 }
 
-export function RequireAuth({ children }) {
-  const { user } = useAuth();
-  const location = useLocation();
-  if (!user) return <Navigate to={ROUTES.login} replace state={{ from: location.pathname }} />;
-  return children;
-}
+import { ProtectedRoute } from '../ProtectedRoute';
+export { ProtectedRoute };
+export const RequireAuth = ProtectedRoute;
 
 /** Vistas solo para clientes (el administrador no usa Contacto). */
 export function CustomerOnly({ children }) {

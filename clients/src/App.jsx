@@ -4,7 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { CatalogProvider } from './context/CatalogContext';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
-import { AdminLayout, CustomerOnly, GuestOnly, RequireAuth, SiteLayout } from './components/layout/Layouts';
+import { AdminLayout, CustomerOnly, GuestOnly, ProtectedRoute, SiteLayout } from './components/layout/Layouts';
 import { ROUTES } from './config/routes';
 import { HomePage } from './pages/HomePage';
 import { CatalogPage } from './pages/CatalogPage';
@@ -36,7 +36,8 @@ export function App() {
                 <Route path="/catalogo" element={<Navigate to={ROUTES.catalog} replace />} />
                 <Route path="/productos/:id" element={<DetailPage />} />
                 <Route path={ROUTES.contact} element={<CustomerOnly><ContactPage /></CustomerOnly>} />
-                <Route path={ROUTES.profile} element={<RequireAuth><UserProfilePage /></RequireAuth>} />
+                <Route path={ROUTES.profile} element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
+                <Route path={ROUTES.orders} element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
                 <Route path="*" element={<NotFoundPage />} />
               </Route>          
 

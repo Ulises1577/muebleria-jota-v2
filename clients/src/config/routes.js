@@ -5,6 +5,7 @@ export const ROUTES = {
   product: (id) => `/productos/${encodeURIComponent(id)}`,
   contact: '/contacto',
   profile: '/perfil',
+  orders: '/mis-pedidos',
   login: '/login',
   register: '/registro',
   admin: '/admin',

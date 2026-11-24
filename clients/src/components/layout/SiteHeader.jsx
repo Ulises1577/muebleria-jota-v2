@@ -60,8 +60,13 @@ function UserMenu() {
             </>
           ) : null}
           <button type="button" role="menuitem" className="menu-item" onClick={() => go(ROUTES.profile)}>
-            <Icon name="user" size={16} /> {isAdmin ? 'Mi cuenta' : 'Mi cuenta y pedidos'}
+            <Icon name="user" size={16} /> Mi cuenta
           </button>
+          {!isAdmin && (
+            <button type="button" role="menuitem" className="menu-item" onClick={() => go(ROUTES.orders)}>
+              <Icon name="receipt" size={16} /> Mis pedidos
+            </button>
+          )}
           <div className="menu-divider" />
           <button
             type="button"
