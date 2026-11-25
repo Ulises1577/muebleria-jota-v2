@@ -560,7 +560,8 @@
   display: flex;
   flex-direction: column;
   width: min(440px, 100vw);
-  height: 100%;
+  height: 100vh;
+  height: 100dvh;
   background: var(--color-surface);
   box-shadow: var(--shadow-lg);
   animation: drawer-in 260ms var(--ease-out);
@@ -569,6 +570,7 @@
 
 .modal__header {
   display: flex;
+  flex: 0 0 auto;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-4);
@@ -580,9 +582,10 @@
 .drawer .modal__header { border-radius: 0; }
 .modal__eyebrow { margin-bottom: var(--space-1); color: var(--color-primary); font-size: var(--text-2xs); font-weight: 500; letter-spacing: var(--tracking-caps); text-transform: uppercase; }
 .modal__title { color: var(--color-primary); font-size: var(--text-xl); font-weight: 400; letter-spacing: .03em; text-transform: uppercase; }
-.modal__body { flex: 1; padding: var(--space-6); overflow-y: auto; }
+.modal__body { flex: 1 1 auto; min-height: 0; padding: var(--space-6); overflow-y: auto; }
 .modal__footer {
   display: flex;
+  flex: 0 0 auto;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--space-2);
