@@ -102,7 +102,7 @@ export function CartDrawer() {
     setSubmitting(true);
     setSubmitError('');
     try {
-      const { order, duplicated } = await orderService.createOrder({
+      const { order, duplicated, status } = await orderService.createOrder({
         items: cart.items,
         idempotencyKey: attemptRef.current.key,
         datosEnvio: {
@@ -111,6 +111,9 @@ export function CartDrawer() {
           notas: shipping.notas.trim()
         }
       });
+      if (status !== 201 && !duplicated) {
+        throw new Error('El servidor no confirmó el pedido. El carrito sigue guardado; intentá nuevamente.');
+      }
       attemptRef.current = { signature: '', key: '' };
       cart.clear();
       cart.close();
