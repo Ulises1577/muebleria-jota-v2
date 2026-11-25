@@ -13,6 +13,7 @@ import { ContactPage } from './pages/ContactPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { UserProfilePage } from './pages/UserProfilePage';
+import { UserOrdersPage } from './pages/UserOrdersPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { AdminProductsPage } from './pages/admin/AdminProductsPage';
 import { AdminCreateProductPage } from './pages/admin/AdminCreateProductPage';
@@ -37,7 +38,7 @@ export function App() {
                 <Route path="/productos/:id" element={<DetailPage />} />
                 <Route path={ROUTES.contact} element={<CustomerOnly><ContactPage /></CustomerOnly>} />
                 <Route path={ROUTES.profile} element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
-                <Route path={ROUTES.orders} element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
+                <Route path={ROUTES.orders} element={<ProtectedRoute><UserOrdersPage /></ProtectedRoute>} />
                 <Route path="*" element={<NotFoundPage />} />
               </Route>          
 
