@@ -9,6 +9,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(() => (authService.getToken() ? authService.getUser() : null));
+  const [isLoading, setIsLoading] = useState(() => Boolean(authService.getToken() && !authService.getUser()));
 
   // Al cargar, se confirma con el servidor que el token siga siendo válido
   useEffect(() => {
@@ -19,9 +20,13 @@ export function AuthProvider({ children }) {
       .then((current) => active && setUser(current))
       .catch((error) => {
         // Solo se cierra la sesión si el servidor rechazó el token; un corte de red no la borra.
-        if (!active || ![401, 403, 404].includes(error?.status)) return;
-        authService.logout();
-        setUser(null);
+        if (active && [401, 403, 404].includes(error?.status)) {
+          authService.logout();
+          setUser(null);
+        }
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
       });
     return () => {
       active = false;
@@ -62,8 +67,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, isAdmin: isAdminUser(user), login, register, logout, updateProfile }),
-    [user, login, register, logout, updateProfile]
+    () => ({ user, isAdmin: isAdminUser(user), isLoading, login, register, logout, updateProfile }),
+    [user, isLoading, login, register, logout, updateProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
