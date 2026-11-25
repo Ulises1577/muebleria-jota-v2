@@ -27,7 +27,7 @@ export class ApiError extends Error {
  * Cliente HTTP único del front: arma la URL, agrega el token cuando hace falta,
  * traduce errores a ApiError y avisa a la app si la sesión venció.
  */
-export async function apiRequest(path, { method = 'GET', body, auth = false, fallbackMessage, signal, headers: extraHeaders } = {}) {
+export async function apiRequest(path, { method = 'GET', body, auth = false, fallbackMessage, signal, headers: extraHeaders, includeStatus = false } = {}) {
   const headers = { ...extraHeaders };
   if (body !== undefined) headers['Content-Type'] = 'application/json';
   if (auth) {
@@ -66,7 +66,7 @@ export async function apiRequest(path, { method = 'GET', body, auth = false, fal
     });
   }
 
-  return payload;
+  return includeStatus ? { payload, status: response.status } : payload;
 }
 
 /** Consulta el endpoint raíz de la API para mostrar si los servicios están operativos. */
