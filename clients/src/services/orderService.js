@@ -8,7 +8,7 @@ export const orderService = {
    * `idempotencyKey` identifica el intento de compra para que un reenvío no duplique el pedido.
    */
   async createOrder({ items, datosEnvio, idempotencyKey }) {
-    const result = await apiRequest('/pedidos', {
+    const response = await apiRequest('/pedidos', {
       method: 'POST',
       auth: true,
       headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined,
@@ -19,9 +19,14 @@ export const orderService = {
         })),
         datosEnvio
       },
-      fallbackMessage: 'No se pudo registrar el pedido.'
+      fallbackMessage: 'No se pudo registrar el pedido.',
+      includeStatus: true
     });
-    return { order: result.data, duplicated: Boolean(result.duplicated) };
+    return {
+      order: response.payload?.data,
+      duplicated: Boolean(response.payload?.duplicated),
+      status: response.status
+    };
   },
 
   async getMyOrders() {
