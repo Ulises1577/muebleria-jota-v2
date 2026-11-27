@@ -67,7 +67,7 @@
 /* Secciones */
 .home-section { padding-block: var(--space-20); }
 .section-heading { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-8); }
-.display-title { color: var(--color-primary); font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 400; letter-spacing: .02em; }
+.display-title { color: var(--color-primary); font-size: clamp(2rem, 4vw, 2.40rem); font-weight: 400; letter-spacing: 0; }
 .section-link {
   display: inline-flex;
   align-items: center;
@@ -86,8 +86,8 @@
 .sostenibilidad__row { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 70px; }
 .sostenibilidad__row--reverse .sostenibilidad__media { order: -1; }
 .sostenibilidad__copy { display: flex; flex-direction: column; gap: var(--space-5); }
-.sostenibilidad__title { color: var(--color-text); font-size: clamp(1.9rem, 3.5vw, 2.6rem); font-weight: 400; line-height: 1.1; }
-.sostenibilidad__text { color: var(--color-text-muted); font-size: 1.125rem; line-height: 1.85; }
+.sostenibilidad__title { color: var(--siena-tostado); font-size: clamp(1.9rem, 3.5vw, 2.2rem); font-weight: 400; line-height: 1.1; }
+.sostenibilidad__text { color: var(--color-text-muted); font-size: 1.1rem; line-height: 1.85; }
 .sostenibilidad__accent { color: var(--salvia-700); font-family: var(--font-serif); font-weight: 700; }
 .sostenibilidad__media img { width: 90%; max-height: 430px; object-fit: contain; border-radius: var(--radius-sm); }
 @media (max-width: 768px) {
@@ -101,7 +101,7 @@
 .mid-century__inner { display: grid; align-items: center; gap: clamp(2rem, 4vw, 3.5rem); }
 @media (min-width: 768px) { .mid-century__inner { grid-template-columns: 35fr 65fr; } }
 .mid-century__copy { display: flex; flex-direction: column; align-items: flex-start; }
-.mid-century__title { margin-bottom: var(--space-4); color: var(--color-primary); font-size: clamp(1.85rem, 3.2vw, 2rem); font-weight: 400; line-height: 1.18; text-wrap: balance; }
+.mid-century__title { margin-bottom: var(--space-4); color: var(--color-primary); font-size: clamp(1.85rem, 3.2vw, 1.8rem); font-weight: 400; line-height: 1.18; text-wrap: balance; }
 .mid-century__text { max-width: 38ch; margin-bottom: clamp(1.5rem, 2.5vw, 2rem); color: var(--color-text-muted); font-size: clamp(0.95rem, 1.1vw, 1.05rem); line-height: 1.65; }
 @media (max-width: 767px) { .mid-century__text { max-width: 100%; } }
 .mid-century__gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(8px, 2vw, 24px); }
